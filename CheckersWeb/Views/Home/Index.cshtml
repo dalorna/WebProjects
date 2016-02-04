@@ -1,3 +1,128 @@
 ﻿@{
     ViewBag.Title = "Home Page";
 }
+
+<style>
+    .gameBoard {
+        width: 610px;
+        height: 620px;
+        /* Set the margin-left and margin-right automatically set */
+        margin: 25px auto;
+        background-color: #6a2587;
+        display: table;
+        border: 2px groove black;
+    }
+
+    .blackSquare, .whiteSquare{
+        width: 75px;
+        height: 75px;
+        display: table-cell;
+    }
+    .blackSquare {
+        background-color: black;
+    }    
+    .whiteSquare{
+        background-color: white;
+    }
+
+    #topRow {
+        width: 610px;
+        height: 75px;
+        margin-left: 10px;
+        margin-top: 10px;
+    }
+    #row {
+        width: 610px;
+        height: 75px;
+        margin-left: 10px;
+    }
+    #bottomeRow {
+        width: 620px;
+        height: 75px;
+        margin-left: 10px;
+        margin-top: 10px;
+    }
+</style>
+
+<div class="gameBoard">
+    <div id="topRow">
+        <div class="whiteSquare" id="sq_0"></div>
+        <div class="blackSquare" id="sq_1"></div>
+        <div class="whiteSquare" id="sq_2"></div>
+        <div class="blackSquare" id="sq_3"></div>
+        <div class="whiteSquare" id="sq_4"></div>
+        <div class="blackSquare" id="sq_5"></div>
+        <div class="whiteSquare" id="sq_6"></div>
+        <div class="blackSquare" id="sq_7"></div>
+    </div>
+    <div id="row">
+        <div class="blackSquare" id="sq_8"></div>
+        <div class="whiteSquare" id="sq_9"></div>
+        <div class="blackSquare" id="sq_10"></div>
+        <div class="whiteSquare" id="sq_11"></div>
+        <div class="blackSquare" id="sq_12"></div>
+        <div class="whiteSquare" id="sq_13"></div>
+        <div class="blackSquare" id="sq_14"></div>
+        <div class="whiteSquare" id="sq_15"></div>
+    </div>
+    <div id="row">
+        <div class="whiteSquare" id="sq_16"></div>
+        <div class="blackSquare" id="sq_17"></div>
+        <div class="whiteSquare" id="sq_18"></div>
+        <div class="blackSquare" id="sq_19"></div>
+        <div class="whiteSquare" id="sq_20"></div>
+        <div class="blackSquare" id="sq_21"></div>
+        <div class="whiteSquare" id="sq_22"></div>
+        <div class="blackSquare" id="sq_23"></div>
+    </div>
+    <div id="row">
+        <div class="blackSquare" id="sq_24"></div>
+        <div class="whiteSquare" id="sq_25"></div>
+        <div class="blackSquare" id="sq_26"></div>
+        <div class="whiteSquare" id="sq_27"></div>
+        <div class="blackSquare" id="sq_28"></div>
+        <div class="whiteSquare" id="sq_29"></div>
+        <div class="blackSquare" id="sq_30"></div>
+        <div class="whiteSquare" id="sq_31"></div>
+    </div>
+    <div id="row">
+        <div class="whiteSquare" id="sq_32"></div>
+        <div class="blackSquare" id="sq_33"></div>
+        <div class="whiteSquare" id="sq_34"></div>
+        <div class="blackSquare" id="sq_35"></div>
+        <div class="whiteSquare" id="sq_36"></div>
+        <div class="blackSquare" id="sq_37"></div>
+        <div class="whiteSquare" id="sq_38"></div>
+        <div class="blackSquare" id="sq_39"></div>
+    </div>
+    <div id="row">
+        <div class="blackSquare" id="sq_40"></div>
+        <div class="whiteSquare" id="sq_41"></div>
+        <div class="blackSquare" id="sq_42"></div>
+        <div class="whiteSquare" id="sq_43"></div>
+        <div class="blackSquare" id="sq_44"></div>
+        <div class="whiteSquare" id="sq_45"></div>
+        <div class="blackSquare" id="sq_46"></div>
+        <div class="whiteSquare" id="sq_47"></div>
+    </div>
+    <div id="row">
+        <div class="whiteSquare" id="sq_48"></div>
+        <div class="blackSquare" id="sq_49"></div>
+        <div class="whiteSquare" id="sq_50"></div>
+        <div class="blackSquare" id="sq_51"></div>
+        <div class="whiteSquare" id="sq_52"></div>
+        <div class="blackSquare" id="sq_53"></div>
+        <div class="whiteSquare" id="sq_54"></div>
+        <div class="blackSquare" id="sq_55"></div>
+    </div>
+    <div id="row">
+        <div class="blackSquare" id="sq_56"></div>
+        <div class="whiteSquare" id="sq_57"></div>
+        <div class="blackSquare" id="sq_58"></div>
+        <div class="whiteSquare" id="sq_59"></div>
+        <div class="blackSquare" id="sq_60"></div>
+        <div class="whiteSquare" id="sq_61"></div>
+        <div class="blackSquare" id="sq_62"></div>
+        <div class="whiteSquare" id="sq_63"></div>
+    </div>
+</div>
