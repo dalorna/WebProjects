@@ -42,8 +42,12 @@
         margin-left: 10px;
         margin-top: 10px;
     }
-</style>
 
+    .highlight{
+        border: 1px solid blue;
+    }
+</style>
+<script src="~/Scripts/jquery-1.10.2.min.js"></script>
 <div class="gameBoard">
     <div id="topRow">
         <div class="whiteSquare" id="sq_0"></div>
@@ -126,3 +130,15 @@
         <div class="whiteSquare" id="sq_63"></div>
     </div>
 </div>
+<div>
+    <button id="btn" value="Button" type="button" >Click Me</button>
+</div>
+
+<script type="text/javascript">
+    $("#btn").click(function () {
+        var square = $("#sq_40");
+        //var x = square.position();
+        square.addClass("highlight");
+        //alert("Top: " + x.top + " Left: " + x.left);
+    });
+</script>
