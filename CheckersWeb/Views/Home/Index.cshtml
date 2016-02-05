@@ -1,4 +1,6 @@
-﻿@{
+﻿@model CheckersWeb.Models.BoardViewModel
+
+@{
     ViewBag.Title = "Home Page";
 }
 
@@ -44,10 +46,22 @@
     }
 
     .highlight{
-        border: 1px solid blue;
+        border: 1px solid red;
     }
 </style>
 <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+<script type="text/javascript">
+    $("#btn").click(function () {
+        var square = $("#sq_40");
+        //var x = square.position();
+        square.addClass("highlight");
+        //alert("Top: " + x.top + " Left: " + x.left);
+    });
+
+    function ShowBlack(id) {
+        $(id).addClass("highlight");
+    };
+</script>
 <div class="gameBoard">
     <div id="topRow">
         <div class="whiteSquare" id="sq_0"></div>
@@ -134,11 +148,13 @@
     <button id="btn" value="Button" type="button" >Click Me</button>
 </div>
 
-<script type="text/javascript">
-    $("#btn").click(function () {
-        var square = $("#sq_40");
-        //var x = square.position();
-        square.addClass("highlight");
-        //alert("Top: " + x.top + " Left: " + x.left);
-    });
-</script>
+@foreach(var m in Model.Pieces)
+{
+    if(m.Color == "BLACKPAWN")
+    { 
+        <script type="text/javascript">
+            ShowBlack(@m.Position);
+        </script>
+    }
+}
+

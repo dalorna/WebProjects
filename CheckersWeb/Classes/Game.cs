@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CheckersWeb.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -12,25 +13,27 @@ namespace CheckersWeb.Classes
         private const int TOPMARGIN = 35;
         private const int LEFTMARGIN = 35;
 
-        private void InitBoard()
+        public IEnumerable<GamePieceViewModel> InitBoard()
         {
             int iInd = 0;
             int iIndex = 64;
             int iWhite = 1;
             int iBlack = 1;
-
+            var Pieces = new List<GamePieceViewModel>();
             for (int i = 0; i < (BOARDSIZE * BOARDSIZE); i++)
             {
                 int iRow = i / 8;
                 int iColumn = i % 8;
 
-                if (iRow > 4 && ((iRow % 2 == 0 && iColumn % 2 == 0) || (iRow % 2 == 1 && iColumn % 2 == 1) == false))
-                {
+                //TODO:: Add tiles to board model? This might be better than generating the board in html...???
 
+                if (iRow > 4 && ((iRow % 2 == 0 && iColumn % 2 == 0) || (iRow % 2 == 1 && iColumn % 2 == 1)) == false)
+                {
+                    Pieces.Add(new GamePieceViewModel { Color = GridState.BLACKPAWN.ToString(), Position = "sq_" + i });
                 }
-                else if (iRow < 3 && ((iRow % 2 == 0 && iColumn % 2 == 0) || (iRow % 2 == 1 && iColumn % 2 == 1)))
+                else if (iRow < 3 && ((iRow % 2 == 0 && iColumn % 2 == 0) || (iRow % 2 == 1 && iColumn % 2 == 1)) == false)
                 {
-
+                    Pieces.Add(new GamePieceViewModel { Color = GridState.WHITEPAWN.ToString(), Position = "sq_" + i });
                 }
                 else
                 {
@@ -94,6 +97,8 @@ namespace CheckersWeb.Classes
                     //}
                 
             }
+
+            return Pieces;
         }
     }
 }

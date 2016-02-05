@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CheckersWeb.Classes;
+using CheckersWeb.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -10,7 +12,12 @@ namespace CheckersWeb.Controllers
     {
         public ActionResult Index()
         {
-            return View();
+            var game = new Game();
+            var model = new BoardViewModel
+            {
+                Pieces = game.InitBoard()
+            };
+            return View(model);
         }
     }
 }
