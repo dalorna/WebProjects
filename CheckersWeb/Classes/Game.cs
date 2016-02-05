@@ -29,11 +29,11 @@ namespace CheckersWeb.Classes
 
                 if (iRow > 4 && ((iRow % 2 == 0 && iColumn % 2 == 0) || (iRow % 2 == 1 && iColumn % 2 == 1)) == false)
                 {
-                    Pieces.Add(new GamePieceViewModel { Color = GridState.BLACKPAWN.ToString(), Position = "sq_" + i });
+                    Pieces.Add(new GamePieceViewModel { Color = GridState.BLACKPAWN.ToString(), Position = "sq_" + i, Index = i });
                 }
                 else if (iRow < 3 && ((iRow % 2 == 0 && iColumn % 2 == 0) || (iRow % 2 == 1 && iColumn % 2 == 1)) == false)
                 {
-                    Pieces.Add(new GamePieceViewModel { Color = GridState.WHITEPAWN.ToString(), Position = "sq_" + i });
+                    Pieces.Add(new GamePieceViewModel { Color = GridState.WHITEPAWN.ToString(), Position = "sq_" + i, Index = i });
                 }
                 else
                 {

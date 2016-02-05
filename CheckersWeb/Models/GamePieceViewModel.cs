@@ -9,5 +9,6 @@ namespace CheckersWeb.Models
     {
         public string Position { get; set; }
         public string Color { get; set; }
+        public int Index { get; set; }
     }
 }

@@ -15,15 +15,17 @@
         border: 2px groove black;
     }
 
-    .blackSquare, .whiteSquare{
+    .blackSquare, .whiteSquare {
         width: 75px;
         height: 75px;
         display: table-cell;
     }
+
     .blackSquare {
         background-color: black;
-    }    
-    .whiteSquare{
+    }
+
+    .whiteSquare {
         background-color: white;
     }
 
@@ -33,11 +35,13 @@
         margin-left: 10px;
         margin-top: 10px;
     }
+
     #row {
         width: 610px;
         height: 75px;
         margin-left: 10px;
     }
+
     #bottomeRow {
         width: 620px;
         height: 75px;
@@ -45,8 +49,19 @@
         margin-top: 10px;
     }
 
-    .highlight{
+    .highlight {
         border: 1px solid red;
+    }
+
+    .blackImage {
+        background-image:;
+    }
+    .centerImage {
+        display: block;
+        margin-top: 10px;
+        margin-left: 10px;
+        height: 50px;
+        width: 50px;
     }
 </style>
 <script src="~/Scripts/jquery-1.10.2.min.js"></script>
@@ -58,8 +73,8 @@
         //alert("Top: " + x.top + " Left: " + x.left);
     });
 
-    function ShowBlack(id) {
-        $(id).addClass("highlight");
+    function ShowBlack(id, pos, img) {
+        $(id).addClass('highlight').prepend('<img class="centerImage" id="' + pos + '" src="' + img + '" />');
     };
 </script>
 <div class="gameBoard">
@@ -145,15 +160,33 @@
     </div>
 </div>
 <div>
-    <button id="btn" value="Button" type="button" >Click Me</button>
+    <button id="btn" value="Button" type="button">Click Me</button>
 </div>
 
-@foreach(var m in Model.Pieces)
+@foreach (var m in Model.Pieces)
 {
-    if(m.Color == "BLACKPAWN")
-    { 
+    if (m.Color == "BLACKPAWN")
+    {
         <script type="text/javascript">
-            ShowBlack(@m.Position);
+            ShowBlack(@m.Position, @m.Index, "/Content/Assets/BlackPiece.png");
+        </script>
+    }
+    else if (m.Color == "WHITEPAWN")
+    {
+        <script type="text/javascript">
+            ShowBlack(@m.Position, @m.Index, "/Content/Assets/WhitePiece.png");
+        </script>
+    }
+    else if (m.Color == "BLACKKING")
+    {
+        <script type="text/javascript">
+            ShowBlack(@m.Position, @m.Index, "/Content/Assets/BlackKing.png");
+        </script>
+    }
+    else if (m.Color == "WHITEKING")
+    {
+        <script type="text/javascript">
+            ShowBlack(@m.Position, @m.Index, "/Content/Assets/WhiteKing.png");
         </script>
     }
 }
