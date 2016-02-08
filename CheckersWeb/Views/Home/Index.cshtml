@@ -104,6 +104,14 @@
 
 <script type="text/javascript">
     var movingPiece;
+    var gameStatus = "STARTGAME";
+
+    $( document ).ajaxComplete(function() {
+        if(gameStatus == "BLACKTURN")
+        {
+            BlackMove();
+        }
+    });
 
     function allowDrop(ev) {
         ev.preventDefault();
@@ -124,14 +132,42 @@
             data: {
                 colorMovingPiece: movingPiece.alt,
                 fromPosition: movingPiece.id,
-                toPosition: id
+                toPosition: id,
+                gameState: "WHITETURN"
+
             },
             dataType: "html",
             success: function (data) {
                 ShowBoard(data);
+                gameStatus = "BLACKTURN";
             },
             error: function (xhr, ajaxOptions, thrownError) {
-                alert(xhr.status);
+                alert("statusPlayer: " + xhr.status);
+                alert(thrownError);
+            }
+        });
+    }
+
+
+    function BlackMove()
+    {
+        $.ajax({
+            url: '@Url.Action("Index", "Home")',
+            type: 'POST',
+            data: {
+                colorMovingPiece: "NULL",
+                fromPosition: "65",
+                toPosition: "65",
+                gameState: "BLACKTURN"
+
+            },
+            dataType: "html",
+            success: function (data) {
+                ShowBoard(data);
+                gameStatus = "WHITETURN";
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert("statusComputer: " + xhr.status);
                 alert(thrownError);
             }
         });
@@ -178,13 +214,17 @@
             url: '@Url.Action("Index", "Home")',
             type: 'POST',
             data: {
-                colorMovingPiece: "STARTGAME",
-                fromPosition: null,
-                toPosition: null
+                colorMovingPiece: "BLACKPAWN",
+                fromPosition: "",
+                toPosition: "",
+                gameState: "DEFAULTGAME"
+
             },
             dataType: "html",
             success: function (data) {
+                $('.centerImage').remove();
                 ShowBoard(data);
+                gameStatus = "WHITETURN";
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 alert(xhr.status);

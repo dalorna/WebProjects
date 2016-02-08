@@ -161,6 +161,7 @@
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Classes\AICheckers.cs" />
     <Compile Include="Classes\Game.cs" />
+    <Compile Include="Classes\GameState.cs" />
     <Compile Include="Classes\GridState.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
