@@ -24,8 +24,23 @@ namespace CheckersWeb.Controllers
         }
 
         [HttpPost]
-        public ActionResult Index(string colorMovingPiece, string FromPosition, string toPosition)
+        public ActionResult Index(GridState colorMovingPiece, string FromPosition, string toPosition)
         {
+            if(colorMovingPiece == (GridState)Enum.Parse(typeof(GridState), "STARTGAME"))
+            {
+                Board = new Game().InitBoard();
+                var gState = Board.ToList().OrderBy(o => o.Index).Select(s => s.Color).ToArray();
+                CheckGame cGame = new CheckGame(gState);
+                var aIBoard = cGame.ComputerMakeMove(5);
+                var pcs = aIBoard.BoardArray.Select((s, i) => new GamePieceViewModel { Color = s, Index = i, Position = "sq_" + i });
+                var startModel = new BoardViewModel
+                {
+                    Pieces = pcs,
+                    IsLegalMove = true
+                };
+                return Json(startModel);
+            }
+
             var game = new Game();
           
             var pos = Board.ToList();
@@ -41,7 +56,7 @@ namespace CheckersWeb.Controllers
             var model = new BoardViewModel
             {
                 Pieces = pos,
-                IsLegalMove = false
+                IsLegalMove = true
             };
             return Json(model);
         }

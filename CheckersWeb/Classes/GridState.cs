@@ -12,6 +12,7 @@ namespace CheckersWeb.Classes
         BLACKPAWN = 1,
         WHITEPAWN = 2,
         BLACKKING = 3,
-        WHITEKING = 4
+        WHITEKING = 4,
+        STARTGAME = 5
     }    
 }

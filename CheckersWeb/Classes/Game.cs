@@ -15,10 +15,6 @@ namespace CheckersWeb.Classes
 
         public IEnumerable<GamePieceViewModel> InitBoard()
         {
-            int iInd = 0;
-            int iIndex = 64;
-            int iWhite = 1;
-            int iBlack = 1;
             var Pieces = new List<GamePieceViewModel>();
             for (int i = 0; i < (BOARDSIZE * BOARDSIZE); i++)
             {
@@ -29,15 +25,22 @@ namespace CheckersWeb.Classes
 
                 if (iRow > 4 && ((iRow % 2 == 0 && iColumn % 2 == 0) || (iRow % 2 == 1 && iColumn % 2 == 1)) == false)
                 {
-                    Pieces.Add(new GamePieceViewModel { Color = GridState.BLACKPAWN.ToString(), Position = "sq_" + i, Index = i });
+                    Pieces.Add(new GamePieceViewModel { Color = GridState.BLACKPAWN, Position = "sq_" + i, Index = i });
                 }
                 else if (iRow < 3 && ((iRow % 2 == 0 && iColumn % 2 == 0) || (iRow % 2 == 1 && iColumn % 2 == 1)) == false)
                 {
-                    Pieces.Add(new GamePieceViewModel { Color = GridState.WHITEPAWN.ToString(), Position = "sq_" + i, Index = i });
+                    Pieces.Add(new GamePieceViewModel { Color = GridState.WHITEPAWN, Position = "sq_" + i, Index = i });
                 }
                 else
                 {
-
+                    if(((iRow % 2 == 0 && iColumn % 2 == 0) || (iRow % 2 == 1 && iColumn % 2 == 1)))
+                    {
+                        Pieces.Add(new GamePieceViewModel { Color = GridState.NULL, Position = "sq_" + i, Index = i });
+                    }
+                    else
+                    {
+                        Pieces.Add(new GamePieceViewModel { Color = GridState.EMPTY, Position = "sq_" + i, Index = i });
+                    }
                 }
 
                     //TilePiece gridCell = new TilePiece(TILESIZE);

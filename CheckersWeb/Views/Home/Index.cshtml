@@ -1,4 +1,6 @@
-﻿@model CheckersWeb.Models.BoardViewModel
+﻿@using CheckersWeb.Classes;
+
+@model CheckersWeb.Models.BoardViewModel
 
 @{
     ViewBag.Title = "Home Page";
@@ -96,7 +98,6 @@
 </div>
 <div>
     <button id="btn" value="Button" type="button">Click Me</button>
-    <img  />
 </div>
 
 
@@ -127,30 +128,7 @@
             },
             dataType: "html",
             success: function (data) {
-                var json = JSON.parse(data);
-                if(json.IslegalMove)
-                {
-                    $('.centerImage').remove();
-                    for(var i = 0; i < json.Pieces.length; i++)
-                    {
-                        if (json.Pieces[i].Color == "BLACKPAWN")
-                        {
-                            ShowPiece(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/BlackPiece.png", json.Pieces[i].Color);
-                        }
-                        else if (json.Pieces[i].Color == "WHITEPAWN")
-                        {
-                            ShowPiece(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/WhitePiece.png", json.Pieces[i].Color);
-                        }
-                        else if (json.Pieces[i].Color == "BLACKKING")
-                        {
-                            ShowPiece(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/BlackKing.png", json.Pieces[i].Color);
-                        }
-                        else if (json.Pieces[i].Color == "WHITEKING")
-                        {
-                            ShowPiece(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/WhiteKing.png", json.Pieces[i].Color);
-                        }
-                    }
-                }
+                ShowBoard(data);
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 alert(xhr.status);
@@ -159,16 +137,60 @@
         });
     }
 
+    function ShowBoard(data){
+        var json = JSON.parse(data);
+        //alert(data);
+        //alert(json);
+        //alert(json.IsLegalMove);
+        if(json.IsLegalMove)
+        {
+            $('.centerImage').remove();
+            for(var i = 0; i < json.Pieces.length; i++)
+            {
+                if (json.Pieces[i].Color == 1)
+                {
+                    ShowPiece(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/BlackPiece.png", json.Pieces[i].Color);
+                }
+                else if (json.Pieces[i].Color == 2)
+                {
+                    ShowPiece(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/WhitePiece.png", json.Pieces[i].Color);
+                }
+                else if (json.Pieces[i].Color == 3)
+                {
+                    ShowPiece(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/BlackKing.png", json.Pieces[i].Color);
+                }
+                else if (json.Pieces[i].Color == 4)
+                {
+                    ShowPiece(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/WhiteKing.png", json.Pieces[i].Color);
+                }
+            }
+        }
+    }
+
     function ShowPiece(id, pos, img, color) {
         $('#' + id).removeClass('highlight').prepend('<img class="centerImage" alt=' + color + ' id="' + pos + '" src="' + img + '" draggable="true" ondragstart="drag(event)" />');
 
     };
 
     $("#btn").click(function () {
-        var square = $("#sq_40");
-        //var x = square.position();
-        square.addClass("highlightClick");
-        //alert("Top: " + x.top + " Left: " + x.left);
+
+        $.ajax({
+            url: '@Url.Action("Index", "Home")',
+            type: 'POST',
+            data: {
+                colorMovingPiece: "STARTGAME",
+                fromPosition: null,
+                toPosition: null
+            },
+            dataType: "html",
+            success: function (data) {
+                ShowBoard(data);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(xhr.status);
+                alert(thrownError);
+            }
+        });
     });
 
     function ShowBlack(id, pos, img, color) {
@@ -180,25 +202,25 @@
 
 @foreach (var m in Model.Pieces)
 {
-    if (m.Color == "BLACKPAWN")
+    if (m.Color == (GridState)Enum.Parse(typeof(GridState), "BLACKPAWN"))
     {
         <script type="text/javascript">
             ShowBlack(@m.Position, @m.Index, "/Content/Assets/BlackPiece.png", '@m.Color');
         </script>
     }
-    else if (m.Color == "WHITEPAWN")
+    else if (m.Color == (GridState)Enum.Parse(typeof(GridState), "WHITEPAWN"))
     {
         <script type="text/javascript">
             ShowBlack(@m.Position, @m.Index, "/Content/Assets/WhitePiece.png", '@m.Color');
         </script>
     }
-    else if (m.Color == "BLACKKING")
+    else if (m.Color == (GridState)Enum.Parse(typeof(GridState), "BLACKKING"))
     {
         <script type="text/javascript">
             ShowBlack(@m.Position, @m.Index, "/Content/Assets/BlackKing.png", '@m.Color');
         </script>
     }
-    else if (m.Color == "WHITEKING")
+    else if (m.Color == (GridState)Enum.Parse(typeof(GridState), "WHITEKING"))
     {
         <script type="text/javascript">
             ShowBlack(@m.Position, @m.Index, "/Content/Assets/WhiteKing.png", '@m.Color');

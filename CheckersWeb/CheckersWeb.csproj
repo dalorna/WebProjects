@@ -159,6 +159,7 @@
     <Compile Include="App_Start\IdentityConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
+    <Compile Include="Classes\AICheckers.cs" />
     <Compile Include="Classes\Game.cs" />
     <Compile Include="Classes\GridState.cs" />
     <Compile Include="Controllers\AccountController.cs" />
