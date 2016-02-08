@@ -12,8 +12,8 @@
         background: red;
     }
 </style>
-<script src="~/Scripts/jquery-1.10.2.min.js"></script>
-
+<script type="text/javascript" src="~/Scripts/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="~/Scripts/GameScript.js"></script>
 <div class="gameBoard">
     <div id="topRow">
         <div class="whiteSquare" id="sq_0"></div>
@@ -99,146 +99,6 @@
 <div>
     <button id="btn" value="Button" type="button">Click Me</button>
 </div>
-
-
-
-<script type="text/javascript">
-    var movingPiece;
-    var gameStatus = "STARTGAME";
-
-    $( document ).ajaxComplete(function() {
-        if(gameStatus == "BLACKTURN")
-        {
-            BlackMove();
-        }
-    });
-
-    function allowDrop(ev) {
-        ev.preventDefault();
-    }
-
-    function drag(ev) {
-        ev.dataTransfer.setData("text", ev.target.id);
-        movingPiece = ev.target;
-    }
-
-    function drop(ev) {
-        ev.preventDefault();
-        var dat = ev.dataTransfer.getData("text");
-        var id = ev.target.id.substring(3, 5);
-        $.ajax({
-            url: '@Url.Action("Index", "Home")',
-            type: 'POST',
-            data: {
-                colorMovingPiece: movingPiece.alt,
-                fromPosition: movingPiece.id,
-                toPosition: id,
-                gameState: "WHITETURN"
-
-            },
-            dataType: "html",
-            success: function (data) {
-                ShowBoard(data);
-                gameStatus = "BLACKTURN";
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                alert("statusPlayer: " + xhr.status);
-                alert(thrownError);
-            }
-        });
-    }
-
-
-    function BlackMove()
-    {
-        $.ajax({
-            url: '@Url.Action("Index", "Home")',
-            type: 'POST',
-            data: {
-                colorMovingPiece: "NULL",
-                fromPosition: "65",
-                toPosition: "65",
-                gameState: "BLACKTURN"
-
-            },
-            dataType: "html",
-            success: function (data) {
-                ShowBoard(data);
-                gameStatus = "WHITETURN";
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                alert("statusComputer: " + xhr.status);
-                alert(thrownError);
-            }
-        });
-    }
-
-    function ShowBoard(data){
-        var json = JSON.parse(data);
-        //alert(data);
-        //alert(json);
-        //alert(json.IsLegalMove);
-        if(json.IsLegalMove)
-        {
-            $('.centerImage').remove();
-            for(var i = 0; i < json.Pieces.length; i++)
-            {
-                if (json.Pieces[i].Color == 1)
-                {
-                    ShowPiece(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/BlackPiece.png", json.Pieces[i].Color);
-                }
-                else if (json.Pieces[i].Color == 2)
-                {
-                    ShowPiece(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/WhitePiece.png", json.Pieces[i].Color);
-                }
-                else if (json.Pieces[i].Color == 3)
-                {
-                    ShowPiece(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/BlackKing.png", json.Pieces[i].Color);
-                }
-                else if (json.Pieces[i].Color == 4)
-                {
-                    ShowPiece(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/WhiteKing.png", json.Pieces[i].Color);
-                }
-            }
-        }
-    }
-
-    function ShowPiece(id, pos, img, color) {
-        $('#' + id).removeClass('highlight').prepend('<img class="centerImage" alt=' + color + ' id="' + pos + '" src="' + img + '" draggable="true" ondragstart="drag(event)" />');
-
-    };
-
-    $("#btn").click(function () {
-
-        $.ajax({
-            url: '@Url.Action("Index", "Home")',
-            type: 'POST',
-            data: {
-                colorMovingPiece: "BLACKPAWN",
-                fromPosition: "",
-                toPosition: "",
-                gameState: "DEFAULTGAME"
-
-            },
-            dataType: "html",
-            success: function (data) {
-                $('.centerImage').remove();
-                ShowBoard(data);
-                gameStatus = "WHITETURN";
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                alert(xhr.status);
-                alert(thrownError);
-            }
-        });
-    });
-
-    function ShowBlack(id, pos, img, color) {
-        $(id).addClass('highlight').prepend('<img class="centerImage" alt=' + color + ' id="' + pos + '" src="' + img + '" draggable="true" ondragstart="drag(event)" />');
-    };
-
-
-</script>
 
 @foreach (var m in Model.Pieces)
 {
