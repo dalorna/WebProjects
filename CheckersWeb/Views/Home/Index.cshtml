@@ -3,191 +3,205 @@
 @{
     ViewBag.Title = "Home Page";
 }
-
 <style>
-    .gameBoard {
-        width: 610px;
-        height: 620px;
-        /* Set the margin-left and margin-right automatically set */
-        margin: 25px auto;
-        background-color: #6a2587;
-        display: table;
-        border: 2px groove black;
-    }
-
-    .blackSquare, .whiteSquare {
-        width: 75px;
-        height: 75px;
-        display: table-cell;
-    }
-
-    .blackSquare {
-        background-color: black;
-    }
-
-    .whiteSquare {
-        background-color: white;
-    }
-
-    #topRow {
-        width: 610px;
-        height: 75px;
-        margin-left: 10px;
-        margin-top: 10px;
-    }
-
-    #row {
-        width: 610px;
-        height: 75px;
-        margin-left: 10px;
-    }
-
-    #bottomeRow {
-        width: 620px;
-        height: 75px;
-        margin-left: 10px;
-        margin-top: 10px;
-    }
-
-    .highlight {
-        border: 1px solid red;
-    }
-
-    .blackImage {
-        background-image:;
-    }
-    .centerImage {
-        display: block;
-        margin-top: 10px;
-        margin-left: 10px;
-        height: 50px;
-        width: 50px;
+    #makeMeDraggable {
+        width: 300px;
+        height: 300px;
+        background: red;
     }
 </style>
 <script src="~/Scripts/jquery-1.10.2.min.js"></script>
-<script type="text/javascript">
-    $("#btn").click(function () {
-        var square = $("#sq_40");
-        //var x = square.position();
-        square.addClass("highlight");
-        //alert("Top: " + x.top + " Left: " + x.left);
-    });
 
-    function ShowBlack(id, pos, img) {
-        $(id).addClass('highlight').prepend('<img class="centerImage" id="' + pos + '" src="' + img + '" />');
-    };
-</script>
 <div class="gameBoard">
     <div id="topRow">
         <div class="whiteSquare" id="sq_0"></div>
-        <div class="blackSquare" id="sq_1"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_1"></div>
         <div class="whiteSquare" id="sq_2"></div>
-        <div class="blackSquare" id="sq_3"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_3"></div>
         <div class="whiteSquare" id="sq_4"></div>
-        <div class="blackSquare" id="sq_5"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_5"></div>
         <div class="whiteSquare" id="sq_6"></div>
-        <div class="blackSquare" id="sq_7"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_7"></div>
     </div>
     <div id="row">
-        <div class="blackSquare" id="sq_8"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_8"></div>
         <div class="whiteSquare" id="sq_9"></div>
-        <div class="blackSquare" id="sq_10"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_10"></div>
         <div class="whiteSquare" id="sq_11"></div>
-        <div class="blackSquare" id="sq_12"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_12"></div>
         <div class="whiteSquare" id="sq_13"></div>
-        <div class="blackSquare" id="sq_14"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_14"></div>
         <div class="whiteSquare" id="sq_15"></div>
     </div>
     <div id="row">
         <div class="whiteSquare" id="sq_16"></div>
-        <div class="blackSquare" id="sq_17"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_17"></div>
         <div class="whiteSquare" id="sq_18"></div>
-        <div class="blackSquare" id="sq_19"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_19"></div>
         <div class="whiteSquare" id="sq_20"></div>
-        <div class="blackSquare" id="sq_21"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_21"></div>
         <div class="whiteSquare" id="sq_22"></div>
-        <div class="blackSquare" id="sq_23"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_23"></div>
     </div>
     <div id="row">
-        <div class="blackSquare" id="sq_24"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_24"></div>
         <div class="whiteSquare" id="sq_25"></div>
-        <div class="blackSquare" id="sq_26"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_26"></div>
         <div class="whiteSquare" id="sq_27"></div>
-        <div class="blackSquare" id="sq_28"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_28"></div>
         <div class="whiteSquare" id="sq_29"></div>
-        <div class="blackSquare" id="sq_30"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_30"></div>
         <div class="whiteSquare" id="sq_31"></div>
     </div>
     <div id="row">
         <div class="whiteSquare" id="sq_32"></div>
-        <div class="blackSquare" id="sq_33"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_33"></div>
         <div class="whiteSquare" id="sq_34"></div>
-        <div class="blackSquare" id="sq_35"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_35"></div>
         <div class="whiteSquare" id="sq_36"></div>
-        <div class="blackSquare" id="sq_37"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_37"></div>
         <div class="whiteSquare" id="sq_38"></div>
-        <div class="blackSquare" id="sq_39"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_39"></div>
     </div>
     <div id="row">
-        <div class="blackSquare" id="sq_40"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_40"></div>
         <div class="whiteSquare" id="sq_41"></div>
-        <div class="blackSquare" id="sq_42"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_42"></div>
         <div class="whiteSquare" id="sq_43"></div>
-        <div class="blackSquare" id="sq_44"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_44"></div>
         <div class="whiteSquare" id="sq_45"></div>
-        <div class="blackSquare" id="sq_46"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_46"></div>
         <div class="whiteSquare" id="sq_47"></div>
     </div>
     <div id="row">
         <div class="whiteSquare" id="sq_48"></div>
-        <div class="blackSquare" id="sq_49"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_49"></div>
         <div class="whiteSquare" id="sq_50"></div>
-        <div class="blackSquare" id="sq_51"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_51"></div>
         <div class="whiteSquare" id="sq_52"></div>
-        <div class="blackSquare" id="sq_53"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_53"></div>
         <div class="whiteSquare" id="sq_54"></div>
-        <div class="blackSquare" id="sq_55"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_55"></div>
     </div>
     <div id="row">
-        <div class="blackSquare" id="sq_56"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_56"></div>
         <div class="whiteSquare" id="sq_57"></div>
-        <div class="blackSquare" id="sq_58"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_58"></div>
         <div class="whiteSquare" id="sq_59"></div>
-        <div class="blackSquare" id="sq_60"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_60"></div>
         <div class="whiteSquare" id="sq_61"></div>
-        <div class="blackSquare" id="sq_62"></div>
+        <div class="blackSquare" ondrop="drop(event)" ondragover="allowDrop(event)" id="sq_62"></div>
         <div class="whiteSquare" id="sq_63"></div>
     </div>
 </div>
 <div>
     <button id="btn" value="Button" type="button">Click Me</button>
+    <img  />
 </div>
+
+
+
+<script type="text/javascript">
+    var movingPiece;
+
+    function allowDrop(ev) {
+        ev.preventDefault();
+    }
+
+    function drag(ev) {
+        ev.dataTransfer.setData("text", ev.target.id);
+        movingPiece = ev.target;
+    }
+
+    function drop(ev) {
+        ev.preventDefault();
+        var dat = ev.dataTransfer.getData("text");
+        var id = ev.target.id.substring(3, 5);
+        $.ajax({
+            url: '@Url.Action("Index", "Home")',
+            type: 'POST',
+            data: {
+                colorMovingPiece: movingPiece.alt,
+                fromPosition: movingPiece.id,
+                toPosition: id
+            },
+            dataType: "html",
+            success: function (data) {
+                var json = JSON.parse(data);
+                if(json.IslegalMove)
+                {
+                    $('.centerImage').remove();
+                    for(var i = 0; i < json.Pieces.length; i++)
+                    {
+                        if (json.Pieces[i].Color == "BLACKPAWN")
+                        {
+                            ShowPiece(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/BlackPiece.png", json.Pieces[i].Color);
+                        }
+                        else if (json.Pieces[i].Color == "WHITEPAWN")
+                        {
+                            ShowPiece(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/WhitePiece.png", json.Pieces[i].Color);
+                        }
+                        else if (json.Pieces[i].Color == "BLACKKING")
+                        {
+                            ShowPiece(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/BlackKing.png", json.Pieces[i].Color);
+                        }
+                        else if (json.Pieces[i].Color == "WHITEKING")
+                        {
+                            ShowPiece(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/WhiteKing.png", json.Pieces[i].Color);
+                        }
+                    }
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(xhr.status);
+                alert(thrownError);
+            }
+        });
+    }
+
+    function ShowPiece(id, pos, img, color) {
+        $('#' + id).removeClass('highlight').prepend('<img class="centerImage" alt=' + color + ' id="' + pos + '" src="' + img + '" draggable="true" ondragstart="drag(event)" />');
+
+    };
+
+    $("#btn").click(function () {
+        var square = $("#sq_40");
+        //var x = square.position();
+        square.addClass("highlightClick");
+        //alert("Top: " + x.top + " Left: " + x.left);
+    });
+
+    function ShowBlack(id, pos, img, color) {
+        $(id).addClass('highlight').prepend('<img class="centerImage" alt=' + color + ' id="' + pos + '" src="' + img + '" draggable="true" ondragstart="drag(event)" />');
+    };
+
+
+</script>
 
 @foreach (var m in Model.Pieces)
 {
     if (m.Color == "BLACKPAWN")
     {
         <script type="text/javascript">
-            ShowBlack(@m.Position, @m.Index, "/Content/Assets/BlackPiece.png");
+            ShowBlack(@m.Position, @m.Index, "/Content/Assets/BlackPiece.png", '@m.Color');
         </script>
     }
     else if (m.Color == "WHITEPAWN")
     {
         <script type="text/javascript">
-            ShowBlack(@m.Position, @m.Index, "/Content/Assets/WhitePiece.png");
+            ShowBlack(@m.Position, @m.Index, "/Content/Assets/WhitePiece.png", '@m.Color');
         </script>
     }
     else if (m.Color == "BLACKKING")
     {
         <script type="text/javascript">
-            ShowBlack(@m.Position, @m.Index, "/Content/Assets/BlackKing.png");
+            ShowBlack(@m.Position, @m.Index, "/Content/Assets/BlackKing.png", '@m.Color');
         </script>
     }
     else if (m.Color == "WHITEKING")
     {
         <script type="text/javascript">
-            ShowBlack(@m.Position, @m.Index, "/Content/Assets/WhiteKing.png");
+            ShowBlack(@m.Position, @m.Index, "/Content/Assets/WhiteKing.png", '@m.Color');
         </script>
     }
 }
-

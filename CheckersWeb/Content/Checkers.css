@@ -1,0 +1,66 @@
+﻿    .gameBoard {
+        width: 610px;
+        height: 620px;
+        /* Set the margin-left and margin-right automatically set */
+        margin: 25px auto;
+        background-color: #6a2587;
+        display: table;
+        border: 2px groove black;
+    }
+
+    .blackSquare, .whiteSquare {
+        width: 75px;
+        height: 75px;
+        display: table-cell;
+    }
+
+    .blackSquare {
+        background-color: black;
+    }
+
+    .whiteSquare {
+        background-color: white;
+    }
+
+    #topRow {
+        width: 610px;
+        height: 75px;
+        margin-left: 10px;
+        margin-top: 10px;
+    }
+
+    #row {
+        width: 610px;
+        height: 75px;
+        margin-left: 10px;
+    }
+
+    #bottomeRow {
+        width: 620px;
+        height: 75px;
+        margin-left: 10px;
+        margin-top: 10px;
+    }
+
+    .highlight {
+        border: 1px solid red;
+    }
+
+    .highlightO {
+        border: 3px solid #ffd800;
+    }
+
+    .highlightClick{
+        border: 2px solid blue;
+    }
+
+    .blackImage {
+        background-image:;
+    }
+    .centerImage {
+        display: block;
+        margin-top: 10px;
+        margin-left: 10px;
+        height: 50px;
+        width: 50px;
+    }
