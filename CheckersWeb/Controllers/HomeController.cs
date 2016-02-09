@@ -61,12 +61,14 @@ namespace CheckersWeb.Controllers
             {
                 try
                 {
+                    if (colorMovingPiece.ToString().Contains("WHITE") == false) return Json(new BoardViewModel { IsLegalMove = false, Pieces = Board });
+
                     var pos = Board.ToList();
 
                     if (pos.FirstOrDefault(f => f.Color == colorMovingPiece && f.Index == int.Parse(FromPosition)) == null || string.IsNullOrWhiteSpace(toPosition))
                         return Json(new BoardViewModel { IsLegalMove = false, Pieces = pos });
 
-                    var islegal = IsLegalMove(colorMovingPiece, int.Parse(FromPosition));
+                    var islegal = MoveISLegal(colorMovingPiece, int.Parse(FromPosition), int.Parse(toPosition));
                     if ((islegal.IsMove || islegal.IsCapture) == false)
                         return Json(new BoardViewModel { IsLegalMove = false, Pieces = pos });
 
@@ -103,24 +105,7 @@ namespace CheckersWeb.Controllers
             return jResult;
         }
 
-        static Predicate<List<int>> ByGridForWhite(GridState entry, int i)
-        {
-            return delegate (List<int> x)
-            {
-                int iIndex = x.FindIndex(ByInt(i));
-                bool bCanMoveForwardForWhite = iIndex + 1 < x.Count && iIndex >= 0 && x[iIndex] < x[iIndex + 1];
-                bool b = iIndex != -1 && ((entry == GridState.WHITEPAWN && bCanMoveForwardForWhite) || entry == GridState.WHITEKING);
-                return b;
-            };
-        }
 
-        static Predicate<int> ByInt(int iNumb)
-        {
-            return delegate (int y)
-            {
-                return y == iNumb;
-            };
-        }
 
         public List<List<int>> gameLines = new List<List<int>>()
             {   new List<int> (){1, 8, 0, 0, 0, 0, 0, 0 },
@@ -137,12 +122,31 @@ namespace CheckersWeb.Controllers
                 new List<int> (){24, 33, 42, 51, 60, 0, 0, 0 },
                 new List<int> (){40, 49, 58, 0, 0, 0, 0, 0 } };
 
+        static Predicate<List<int>> ByGridForWhite(GridState entry, int iStart, int iFinish)
+        {
+            return delegate(List<int> x)
+            {
+                int iIndex = x.FindIndex(ByInt(iStart));
+                int iFinishIndex = x.FindIndex(ByInt(iFinish));
+                bool bCanMoveForwardForWhite = (iIndex + 1 < x.Count && iIndex >= 0 && x[iIndex] < x[iIndex + 1]) && iFinishIndex < x.Count;
+                bool b = iIndex != -1 && iFinishIndex != -1 && ((entry == GridState.WHITEPAWN && bCanMoveForwardForWhite) || entry == GridState.WHITEKING);
+                return b;
+            };
+        }
 
-        private Move IsLegalMove(GridState Piece, int iStartIndex)
+        static Predicate<int> ByInt(int iNumb)
+        {
+            return delegate(int y)
+            {
+                return y == iNumb;
+            };
+        }
+
+        private Move MoveISLegal(GridState Piece, int iStartIndex, int iFinishIndex)
         {
             var BoardArray = Board.ToList().OrderBy(o => o.Index).Select(s => s.Color).ToArray();
             List<List<int>> linesToEvaluate = new List<List<int>>();
-            linesToEvaluate = gameLines.FindAll(ByGridForWhite(BoardArray[iStartIndex], iStartIndex));
+            linesToEvaluate = gameLines.FindAll(ByGridForWhite(BoardArray[iStartIndex], iStartIndex, iFinishIndex));
             List<List<int>> linesEvaluated = new List<List<int>>();
             List<List<int>> extraLines = new List<List<int>>();
             int _moveSquare = 0;

@@ -7,11 +7,10 @@ $(document).ajaxComplete(function () {
     }
 });
 
-
 $(document).ready(function () {
     $("#btn").click(function () {
         $.ajax({
-            url: '/Home/Index',//'@Url.Action("Index", "Home")',
+            url: '/Home/Index',
             type: 'POST',
             data: {
                 colorMovingPiece: "BLACKPAWN",
@@ -23,8 +22,8 @@ $(document).ready(function () {
             dataType: "html",
             success: function (data) {
                 $('.centerImage').remove();
+                gameStatus = "STARTGAME";
                 ShowBoard(data);
-                gameStatus = "WHITETURN";
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 alert(xhr.status);
@@ -33,8 +32,6 @@ $(document).ready(function () {
         });
     });
 });
-
-
 
 function allowDrop(ev) {
     ev.preventDefault();
@@ -50,7 +47,7 @@ function drop(ev) {
     var dat = ev.dataTransfer.getData("text");
     var id = ev.target.id.substring(3, 5);
     $.ajax({
-        url: '/Home/Index',//'@Url.Action("Index", "Home")',
+        url: '/Home/Index',
         type: 'POST',
         data: {
             colorMovingPiece: movingPiece.alt,
@@ -62,7 +59,6 @@ function drop(ev) {
         dataType: "html",
         success: function (data) {
             ShowBoard(data);
-            gameStatus = "BLACKTURN";
         },
         error: function (xhr, ajaxOptions, thrownError) {
             alert("statusPlayer: " + xhr.status);
@@ -73,7 +69,7 @@ function drop(ev) {
 
 function BlackMove() {
     $.ajax({
-        url: '/Home/Index',//'@Url.Action("Index", "Home")',
+        url: '/Home/Index',
         type: 'POST',
         data: {
             colorMovingPiece: "NULL",
@@ -85,7 +81,6 @@ function BlackMove() {
         dataType: "html",
         success: function (data) {
             ShowBoard(data);
-            gameStatus = "WHITETURN";
         },
         error: function (xhr, ajaxOptions, thrownError) {
             alert("statusComputer: " + xhr.status);
@@ -96,9 +91,6 @@ function BlackMove() {
 
 function ShowBoard(data) {
     var json = JSON.parse(data);
-    //alert(data);
-    //alert(json);
-    //alert(json.IsLegalMove);
     if (json.IsLegalMove) {
         $('.centerImage').remove();
         for (var i = 0; i < json.Pieces.length; i++) {
@@ -115,6 +107,16 @@ function ShowBoard(data) {
                 ShowPiece(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/WhiteKing.png", json.Pieces[i].Color);
             }
         }
+
+        if(gameStatus == "WHITETURN")
+        {
+            gameStatus = "BLACKTURN"
+        }
+        else
+        {
+            gameStatus = "WHITETURN";
+        }
+
     }
 }
 
