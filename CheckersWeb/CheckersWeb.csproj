@@ -163,6 +163,7 @@
     <Compile Include="Classes\Game.cs" />
     <Compile Include="Classes\GameState.cs" />
     <Compile Include="Classes\GridState.cs" />
+    <Compile Include="Classes\PlayerMoves.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
