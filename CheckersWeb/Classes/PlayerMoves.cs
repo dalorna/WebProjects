@@ -53,67 +53,117 @@ namespace CheckersWeb.Classes
         public Move MoveISLegal(GridState Piece, int iStartIndex, int iFinishIndex)
         {
             var BoardArray = Board.ToList().OrderBy(o => o.Index).Select(s => s.Color).ToArray();
-            List<List<int>> linesToEvaluate = new List<List<int>>();
-            linesToEvaluate = gameLines.FindAll(ByGridForWhite(BoardArray[iStartIndex], iStartIndex, iFinishIndex));
-            List<List<int>> linesEvaluated = new List<List<int>>();
-            List<List<int>> extraLines = new List<List<int>>();
+            List<List<int>> linesToEvaluate = gameLines.FindAll(ByGridForWhite(BoardArray[iStartIndex], iStartIndex, iFinishIndex));
+            List<int> line = linesToEvaluate[0];
             int _moveSquare = 0;
             int _captureSquare = 0;
             GridState _finalSate = Piece;
             bool _IsMove = false;
             bool _IsCapture = false;
 
-            if (BoardArray[iStartIndex] == GridState.WHITEKING)
+
+            bool bKing = iFinishIndex < iStartIndex && Piece == GridState.WHITEKING;
+
+
+            int squareCurrentPieceIsOnIndex = line.IndexOf(iStartIndex);
+            int squareToMoveToIndex = BoardArray[iStartIndex] == GridState.WHITEKING ? (bKing ? squareCurrentPieceIsOnIndex - 1 : squareCurrentPieceIsOnIndex + 1) : squareCurrentPieceIsOnIndex + 1;
+            int captureIndexForWhiteIndex = BoardArray[iStartIndex] == GridState.WHITEKING ? (bKing ? squareCurrentPieceIsOnIndex - 2 : squareCurrentPieceIsOnIndex + 2) : squareCurrentPieceIsOnIndex + 2;
+            GridState startingSquare = BoardArray[iStartIndex];
+
+            if (squareToMoveToIndex >= 0 && squareToMoveToIndex < line.Count())
             {
-                foreach (var bline in linesToEvaluate)
+                _moveSquare = line[squareToMoveToIndex];
+                _captureSquare = captureIndexForWhiteIndex > 0 && captureIndexForWhiteIndex < line.Count() ? line[captureIndexForWhiteIndex] : -1;
+
+                bool bHasCaptureSquareToLandOn = _captureSquare >= 0 && BoardArray[_captureSquare] == GridState.EMPTY;
+                bool bHasPieceThatCanBeCaptued = BoardArray[_moveSquare] == GridState.BLACKKING || BoardArray[_moveSquare] == GridState.BLACKPAWN;
+                bool bHasMoveThatCanBeMade = BoardArray[_moveSquare] == GridState.EMPTY;
+
+                if ((bHasMoveThatCanBeMade || (bHasCaptureSquareToLandOn && bHasPieceThatCanBeCaptued)) == false)
+                    return new Move { StartIndex = iStartIndex, PieceState = _finalSate, IsMove = false, IsCapture = false, CaptureIndex = _captureSquare, MoveIndex = _moveSquare };
+
+                if (BoardArray[_moveSquare] == GridState.EMPTY)
                 {
-                    List<int> nLine = new List<int>();
-                    nLine.AddRange(bline);
-                    extraLines.Add(nLine);
+                    _finalSate = (startingSquare == GridState.WHITEPAWN && (_moveSquare == 56 || _moveSquare == 58 || _moveSquare == 60 || _moveSquare == 62)) ? GridState.WHITEKING : startingSquare;
+                    _IsMove = true;
+                }
+
+                if (_captureSquare > 0 && !_IsMove)
+                {
+                    _finalSate = (startingSquare == GridState.WHITEPAWN && (_moveSquare == 56 || _moveSquare == 58 || _moveSquare == 60 || _moveSquare == 62)) ? GridState.WHITEKING : startingSquare;
+                    _IsCapture = true;
                 }
             }
-
-            linesToEvaluate.AddRange(extraLines);
-            bool bKing = iFinishIndex < iStartIndex;
-
-            foreach (var line in linesToEvaluate)
-            {
-                bool bKingReverseLine = linesEvaluated.Contains(line);
-                linesEvaluated.Add(line);
-
-                int squareCurrentPieceIsOnIndex = line.IndexOf(iStartIndex);
-                int squareToMoveToIndex = BoardArray[iStartIndex] == GridState.WHITEKING ? (bKingReverseLine ? squareCurrentPieceIsOnIndex - 1 : squareCurrentPieceIsOnIndex + 1) : squareCurrentPieceIsOnIndex + 1;
-                int captureIndexForWhiteIndex = BoardArray[iStartIndex] == GridState.WHITEKING ? (bKingReverseLine ? squareCurrentPieceIsOnIndex - 2 : squareCurrentPieceIsOnIndex + 2) : squareCurrentPieceIsOnIndex + 2;
-                GridState startingSquare = BoardArray[iStartIndex];
-
-                if (squareToMoveToIndex >= 0 && squareToMoveToIndex < line.Count())
-                {
-                    _moveSquare = line[squareToMoveToIndex];
-                    _captureSquare = captureIndexForWhiteIndex > 0 && captureIndexForWhiteIndex < line.Count() ? line[captureIndexForWhiteIndex] : -1;
-
-                    bool bHasCaptureSquareToLandOn = _captureSquare >= 0 && BoardArray[_captureSquare] == GridState.EMPTY;
-                    bool bHasPieceThatCanBeCaptued = BoardArray[_moveSquare] == GridState.BLACKKING || BoardArray[_moveSquare] == GridState.BLACKPAWN;
-                    bool bHasMoveThatCanBeMade = BoardArray[_moveSquare] == GridState.EMPTY;
-
-                    if ((bHasMoveThatCanBeMade || (bHasCaptureSquareToLandOn && bHasPieceThatCanBeCaptued)) == false)
-                        continue;
-
-                    if (BoardArray[_moveSquare] == GridState.EMPTY)
-                    {
-                        _finalSate = (startingSquare == GridState.WHITEPAWN && (_moveSquare == 56 || _moveSquare == 58 || _moveSquare == 60 || _moveSquare == 62)) ? GridState.WHITEKING : startingSquare;
-                        _IsMove = true;
-                    }
-
-                    if (_captureSquare > 0 && !_IsMove)
-                    {
-                        _finalSate = (startingSquare == GridState.WHITEPAWN && (_moveSquare == 56 || _moveSquare == 58 || _moveSquare == 60 || _moveSquare == 62)) ? GridState.WHITEKING : startingSquare;
-                        _IsCapture = true;
-                    }
-                }
-            }
+            
 
             return new Move { StartIndex = iStartIndex, PieceState = _finalSate, IsMove = _IsMove, IsCapture = _IsCapture, CaptureIndex = _captureSquare, MoveIndex = _moveSquare };
         }
+
+
+        //public Move MoveISLegal(GridState Piece, int iStartIndex, int iFinishIndex)
+        //{
+        //    var BoardArray = Board.ToList().OrderBy(o => o.Index).Select(s => s.Color).ToArray();
+        //    List<List<int>> linesToEvaluate = new List<List<int>>();
+        //    linesToEvaluate = gameLines.FindAll(ByGridForWhite(BoardArray[iStartIndex], iStartIndex, iFinishIndex));
+        //    List<List<int>> linesEvaluated = new List<List<int>>();
+        //    List<List<int>> extraLines = new List<List<int>>();
+        //    int _moveSquare = 0;
+        //    int _captureSquare = 0;
+        //    GridState _finalSate = Piece;
+        //    bool _IsMove = false;
+        //    bool _IsCapture = false;
+
+        //    if (BoardArray[iStartIndex] == GridState.WHITEKING)
+        //    {
+        //        foreach (var bline in linesToEvaluate)
+        //        {
+        //            List<int> nLine = new List<int>();
+        //            nLine.AddRange(bline);
+        //            extraLines.Add(nLine);
+        //        }
+        //    }
+
+        //    linesToEvaluate.AddRange(extraLines);
+        //    bool bKing = iFinishIndex < iStartIndex;
+
+        //    foreach (var line in linesToEvaluate)
+        //    {
+        //        bool bKingReverseLine = linesEvaluated.Contains(line);
+        //        linesEvaluated.Add(line);
+
+        //        int squareCurrentPieceIsOnIndex = line.IndexOf(iStartIndex);
+        //        int squareToMoveToIndex = BoardArray[iStartIndex] == GridState.WHITEKING ? (bKingReverseLine ? squareCurrentPieceIsOnIndex - 1 : squareCurrentPieceIsOnIndex + 1) : squareCurrentPieceIsOnIndex + 1;
+        //        int captureIndexForWhiteIndex = BoardArray[iStartIndex] == GridState.WHITEKING ? (bKingReverseLine ? squareCurrentPieceIsOnIndex - 2 : squareCurrentPieceIsOnIndex + 2) : squareCurrentPieceIsOnIndex + 2;
+        //        GridState startingSquare = BoardArray[iStartIndex];
+
+        //        if (squareToMoveToIndex >= 0 && squareToMoveToIndex < line.Count())
+        //        {
+        //            _moveSquare = line[squareToMoveToIndex];
+        //            _captureSquare = captureIndexForWhiteIndex > 0 && captureIndexForWhiteIndex < line.Count() ? line[captureIndexForWhiteIndex] : -1;
+
+        //            bool bHasCaptureSquareToLandOn = _captureSquare >= 0 && BoardArray[_captureSquare] == GridState.EMPTY;
+        //            bool bHasPieceThatCanBeCaptued = BoardArray[_moveSquare] == GridState.BLACKKING || BoardArray[_moveSquare] == GridState.BLACKPAWN;
+        //            bool bHasMoveThatCanBeMade = BoardArray[_moveSquare] == GridState.EMPTY;
+
+        //            if ((bHasMoveThatCanBeMade || (bHasCaptureSquareToLandOn && bHasPieceThatCanBeCaptued)) == false)
+        //                continue;
+
+        //            if (BoardArray[_moveSquare] == GridState.EMPTY)
+        //            {
+        //                _finalSate = (startingSquare == GridState.WHITEPAWN && (_moveSquare == 56 || _moveSquare == 58 || _moveSquare == 60 || _moveSquare == 62)) ? GridState.WHITEKING : startingSquare;
+        //                _IsMove = true;
+        //            }
+
+        //            if (_captureSquare > 0 && !_IsMove)
+        //            {
+        //                _finalSate = (startingSquare == GridState.WHITEPAWN && (_moveSquare == 56 || _moveSquare == 58 || _moveSquare == 60 || _moveSquare == 62)) ? GridState.WHITEKING : startingSquare;
+        //                _IsCapture = true;
+        //            }
+        //        }
+        //    }
+
+        //    return new Move { StartIndex = iStartIndex, PieceState = _finalSate, IsMove = _IsMove, IsCapture = _IsCapture, CaptureIndex = _captureSquare, MoveIndex = _moveSquare };
+        //}
     }
 
     public class Move
