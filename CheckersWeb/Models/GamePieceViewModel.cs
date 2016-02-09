@@ -14,6 +14,8 @@ namespace CheckersWeb.Models
 
         public int Index { get; set; }
 
+        public bool IsPromoted { get; set; }
+
         public override string ToString()
         {
             return Position + " " + Color;
