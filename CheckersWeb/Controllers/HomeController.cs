@@ -39,8 +39,10 @@ namespace CheckersWeb.Controllers
                 {
                     Pieces = Board,
                     IsLegalMove = true,
-                    Message = "White Turn"
+                    Message = "White Turn",
+                    GameState = GameState.WHITETURN
                 };
+
                 jResult = Json(startModel);
             }
             else if(gameState == (GameState)Enum.Parse(typeof(GameState), "BLACKTURN"))
@@ -49,11 +51,13 @@ namespace CheckersWeb.Controllers
                 CheckGame cGame = new CheckGame(gState);
                 var aIBoard = cGame.ComputerMakeMove(5);
                 Board = aIBoard.BoardArray.Select((s, i) => new GamePieceViewModel { Color = s, Index = i, Position = "sq_" + i });
+                var currentState = CheckersWeb.Classes.Board.WhiteHasMove(Board.Select(s => s.Color).ToArray()) ? GameState.WHITETURN : GameState.BLACKWIN;
                 var model = new BoardViewModel
                 {
                     Pieces = Board,
                     IsLegalMove = true,
-                    Message = "White Turn"
+                    Message = "White Turn",
+                    GameState = currentState
                 };
                 jResult = Json(model);
             }
@@ -84,11 +88,13 @@ namespace CheckersWeb.Controllers
                         pos.FirstOrDefault(f => f.Index == islegal.CaptureIndex).Color = islegal.PieceState;
                     }
                     Board = pos;
+                    var currentState = CheckersWeb.Classes.Board.BlackHasMove(Board.Select(s => s.Color).ToArray()) ? GameState.BLACKTURN : GameState.WHITEWIN;
                     var model = new BoardViewModel
                     {
                         Pieces = pos,
                         IsLegalMove = true,
-                        Message = "Black Turn"
+                        Message = "Black Turn",
+                        GameState = currentState
                     };
                     jResult = Json(model);
                 }

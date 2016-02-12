@@ -17,12 +17,12 @@ $(document).ready(function () {
                 fromPosition: "",
                 toPosition: "",
                 gameState: "DEFAULTGAME"
-
             },
             dataType: "html",
             success: function (data) {
                 $('.centerImage').remove();
                 gameStatus = "STARTGAME";
+                $('#txtMessage').val('');
                 ShowBoard(data);
             },
             error: function (xhr, ajaxOptions, thrownError) {
@@ -112,11 +112,15 @@ function ShowBoard(data) {
         {
             gameStatus = "BLACKTURN"
         }
-        else
+        else if (gameStatus == "BLACKTURN" || gameStatus == "STARTGAME")
         {
             gameStatus = "WHITETURN";
         }
+        $('#txtMessage').val($('#txtMessage').val() + ShowState(json.GameState) + '\r\n');
 
+        var sc = $('#txtMessage');
+        if (sc.length)
+            sc.scrollTop(sc[0].scrollHeight - sc.height());
     }
 }
 
@@ -125,9 +129,25 @@ function ShowPiece(id, pos, img, color) {
 
 };
 
-
-
-
 function ShowBlack(id, pos, img, color) {
     $(id).addClass('highlight').prepend('<img class="centerImage" alt=' + color + ' id="' + pos + '" src="' + img + '" draggable="true" ondragstart="drag(event)" />');
 };
+
+function ShowState(i)
+{
+    switch(i)
+    {
+        case 0:
+            return 'DEFAULTGAME';
+        case 1:
+            return 'BLACKTURN';
+        case 2:
+            return 'WHITETURN';
+        case 3:
+            return 'BLACKWIN';
+        case 4:
+            return 'WHITEWIN';
+        case 5:
+            return 'DRAW'
+    }
+}

@@ -1,66 +1,87 @@
-﻿    .gameBoard {
-        width: 610px;
-        height: 620px;
-        /* Set the margin-left and margin-right automatically set */
-        margin: 25px auto;
-        background-color: #6a2587;
-        display: table;
-        border: 2px groove black;
-    }
+﻿.gameSection{
+    width: 84%;
+    height: 640px;
+    margin: auto;
+    padding: 10px;
+}
 
-    .blackSquare, .whiteSquare {
-        width: 75px;
-        height: 75px;
-        display: table-cell;
-    }
+.gameBoard {
+    width: 610px;
+    height: 620px;
+    display: table;
+    border: 2px groove black;
+    float: left;
+}
+.gameInfo {
+    margin-left: 640px;
+    height: 620px;
+    width: 220px;
+}
 
-    .blackSquare {
-        background-color: black;
-    }
+.blackSquare, .whiteSquare {
+    width: 75px;
+    height: 75px;
+    display: table-cell;
+}
 
-    .whiteSquare {
-        background-color: white;
-    }
+.blackSquare {
+    background-color: black;
+}
 
-    #topRow {
-        width: 610px;
-        height: 75px;
-        margin-left: 10px;
-        margin-top: 10px;
-    }
+.whiteSquare {
+    background-color: white;
+    border: 1px solid black;
+}
 
-    #row {
-        width: 610px;
-        height: 75px;
-        margin-left: 10px;
-    }
+#topRow {
+    width: 610px;
+    height: 75px;
+    margin-left: 10px;
+    margin-top: 10px;
+}
 
-    #bottomeRow {
-        width: 620px;
-        height: 75px;
-        margin-left: 10px;
-        margin-top: 10px;
-    }
+#row {
+    width: 610px;
+    height: 75px;
+    margin-left: 10px;
+}
 
-    .highlight {
-        border: 1px solid red;
-    }
+#bottomeRow {
+    width: 620px;
+    height: 75px;
+    margin-left: 10px;
+    margin-top: 10px;
+}
 
-    .highlightO {
-        border: 3px solid #ffd800;
-    }
+.highlight {
+    border: 1px solid red;
+}
 
-    .highlightClick{
-        border: 2px solid blue;
-    }
+.highlightO {
+    border: 3px solid #ffd800;
+}
 
-    .blackImage {
-        background-image:;
-    }
-    .centerImage {
-        display: block;
-        margin-top: 10px;
-        margin-left: 10px;
-        height: 50px;
-        width: 50px;
-    }
+.highlightClick{
+    border: 2px solid blue;
+}
+
+.blackImage {
+    background-image:;
+}
+.centerImage {
+    display: block;
+    margin-top: 10px;
+    margin-left: 10px;
+    height: 50px;
+    width: 50px;
+}
+
+.startButton{
+    margin: 10px 0 0 0;
+}
+
+.gameText{
+    height: 582px; 
+    width: 400px;
+    
+}

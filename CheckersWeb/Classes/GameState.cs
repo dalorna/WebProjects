@@ -12,6 +12,6 @@ namespace CheckersWeb.Classes
         WHITETURN = 2,
         BLACKWIN = 3,
         WHITEWIN = 4,
-        INMOVE = 5
+        DRAW = 5
     }
 }
