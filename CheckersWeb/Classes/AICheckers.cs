@@ -96,7 +96,7 @@ namespace CheckersWeb.Classes
             ComputerScore();
         }
 
-        public List<List<int>> gameLines = new List<List<int>>()
+        public static List<List<int>> gameLines = new List<List<int>>()
             {   new List<int> (){1, 8, 0, 0, 0, 0, 0, 0 },
                 new List<int> (){3, 10, 17, 24, 0, 0, 0, 0 },
                 new List<int> (){5, 12, 19, 26, 33, 40, 0, 0 },
@@ -593,6 +593,164 @@ namespace CheckersWeb.Classes
             }
 
             return PossibleBoards;
+        }
+
+        public static bool WhiteHasMove(GridState[] board)
+        {
+            bool bMoveLeftForWhite = false;
+
+            for (int i = 0; i < board.Count(); i++)
+            {
+                var piece = board[i];
+                if (piece == GridState.NULL || piece == GridState.EMPTY)
+                    continue;
+
+                if ((piece == GridState.WHITEKING || piece == GridState.WHITEPAWN) && bMoveLeftForWhite == false)
+                {
+                    bMoveLeftForWhite = FindMoveForWhite(piece, i, board);
+                    if (bMoveLeftForWhite) break;
+                }
+            }
+
+            return bMoveLeftForWhite;
+        }
+
+        public static bool BlackHasMove(GridState[] board)
+        {
+            bool bMoveLeftForBlack = false;
+
+            for (int i = 0; i < board.Count(); i++)
+            {
+                var piece = board[i];
+                if (piece == GridState.NULL || piece == GridState.EMPTY)
+                    continue;
+
+                if ((piece == GridState.BLACKPAWN || piece == GridState.BLACKKING) && bMoveLeftForBlack == false)
+                {
+                    bMoveLeftForBlack = FindMoveForBlack(piece, i, board);
+                    if (bMoveLeftForBlack) break;
+                }
+            }
+
+            return bMoveLeftForBlack;
+        }
+
+        public static bool FindMoveForBlack(GridState piece, int i, GridState[] board)
+        {
+            List<List<int>> linesToEvaluate = new List<List<int>>();
+            linesToEvaluate = gameLines.FindAll(ByGridForBlack(piece, i));
+            List<List<int>> linesEvaluated = new List<List<int>>();
+            List<List<int>> extraLines = new List<List<int>>();
+
+            if (piece == GridState.BLACKKING)
+            {
+                foreach (var bline in linesToEvaluate)
+                {
+                    var nLine = new List<int>();
+                    nLine.AddRange(bline);
+                    extraLines.Add(nLine);
+                }
+            }
+
+            linesToEvaluate.AddRange(extraLines);
+
+            foreach (var line in linesToEvaluate)
+            {
+                bool bKingReverseLine = linesEvaluated.Any(y => y.All(j => line.Contains(j)));
+                linesEvaluated.Add(line);
+                bool isMove = false;
+                int squareCurrentPieceIsOn = line.IndexOf(i);
+                int squareToMoveTo = piece == GridState.BLACKKING ? (bKingReverseLine ? squareCurrentPieceIsOn + 1 : squareCurrentPieceIsOn - 1) : squareCurrentPieceIsOn - 1;
+                int captureIndexForBlack = piece == GridState.BLACKKING ? (bKingReverseLine ? squareCurrentPieceIsOn + 2 : squareCurrentPieceIsOn - 2) : squareCurrentPieceIsOn - 2;
+                int moveSquare = 0;
+                int captureSquare = 0;
+                GridState staringSquare = piece;
+
+                if (squareToMoveTo >= 0 && squareToMoveTo < line.Count())
+                {
+                    moveSquare = line[squareToMoveTo];
+                    captureSquare = captureIndexForBlack >= 0 && captureIndexForBlack < 8 ? line[captureIndexForBlack] : -1;
+
+                    bool bHasCaptureSquareToLandOn = captureSquare >= 0 && board[captureSquare] == GridState.EMPTY;
+                    bool bHasPieceThatCanBeCaptued = board[moveSquare] == GridState.WHITEKING || board[moveSquare] == GridState.WHITEPAWN;
+                    bool bHasMoveThatCanBeMade = board[moveSquare] == GridState.EMPTY;
+
+                    if ((bHasMoveThatCanBeMade || (bHasCaptureSquareToLandOn && bHasPieceThatCanBeCaptued)) == false)
+                        continue;
+
+                    if (board[moveSquare] == GridState.EMPTY)
+                    {
+                        return true;
+                    }
+
+                    if (captureSquare > 0 && !isMove)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public static bool FindMoveForWhite(GridState piece, int i, GridState[] board)
+        {
+            List<List<int>> linesToEvaluate = new List<List<int>>();
+            linesToEvaluate = gameLines.FindAll(ByGridForWhite(board[i], i));
+            List<List<int>> linesEvaluated = new List<List<int>>();
+            List<List<int>> extraLines = new List<List<int>>();
+
+            if (board[i] == GridState.WHITEKING)
+            {
+                foreach (var bline in linesToEvaluate)
+                {
+                    List<int> nLine = new List<int>();
+                    nLine.AddRange(bline);
+                    extraLines.Add(nLine);
+                }
+            }
+
+            linesToEvaluate.AddRange(extraLines);
+
+            foreach (var line in linesToEvaluate)
+            {
+                bool bKingReverseLine = linesEvaluated.Contains(line);
+                linesEvaluated.Add(line);
+
+                bool isMove = false;
+
+                int squareCurrentPieceIsOnIndex = line.IndexOf(i);
+                int squareToMoveToIndex = board[i] == GridState.WHITEKING ? (bKingReverseLine ? squareCurrentPieceIsOnIndex - 1 : squareCurrentPieceIsOnIndex + 1) : squareCurrentPieceIsOnIndex + 1;
+                int captureIndexForWhiteIndex = board[i] == GridState.WHITEKING ? (bKingReverseLine ? squareCurrentPieceIsOnIndex - 2 : squareCurrentPieceIsOnIndex + 2) : squareCurrentPieceIsOnIndex + 2;
+                int moveSquare = 0;
+                int captureSquare = 0;
+                GridState staringSquare = board[i];
+
+                if (squareToMoveToIndex >= 0 && squareToMoveToIndex < line.Count())
+                {
+                    moveSquare = line[squareToMoveToIndex];
+                    captureSquare = captureIndexForWhiteIndex > 0 && captureIndexForWhiteIndex < line.Count() ? line[captureIndexForWhiteIndex] : -1;
+
+                    bool bHasCaptureSquareToLandOn = captureSquare >= 0 && board[captureSquare] == GridState.EMPTY;
+                    bool bHasPieceThatCanBeCaptued = board[moveSquare] == GridState.BLACKKING || board[moveSquare] == GridState.BLACKPAWN;
+                    bool bHasMoveThatCanBeMade = board[moveSquare] == GridState.EMPTY;
+
+                    if ((bHasMoveThatCanBeMade || (bHasCaptureSquareToLandOn && bHasPieceThatCanBeCaptued)) == false)
+                        continue;
+
+                    if (board[moveSquare] == GridState.EMPTY)
+                    {
+                        return true;
+                    }
+
+                    if (captureSquare > 0 && !isMove)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
     }
 }
