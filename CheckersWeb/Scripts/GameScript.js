@@ -10,7 +10,7 @@ $(document).ajaxComplete(function () {
 $(document).ready(function () {
     $("#btn").click(function () {
         $.ajax({
-            url: '/Home/Index',
+            url: '/Checkers/Index',
             type: 'POST',
             data: {
                 colorMovingPiece: "BLACKPAWN",
@@ -47,7 +47,7 @@ function drop(ev) {
     var dat = ev.dataTransfer.getData("text");
     var id = ev.target.id.substring(3, 5);
     $.ajax({
-        url: '/Home/Index',
+        url: '/Checkers/Index',
         type: 'POST',
         data: {
             colorMovingPiece: movingPiece.alt,
@@ -69,7 +69,7 @@ function drop(ev) {
 
 function BlackMove() {
     $.ajax({
-        url: '/Home/Index',
+        url: '/Checkers/Index',
         type: 'POST',
         data: {
             colorMovingPiece: "NULL",

@@ -9,9 +9,6 @@ namespace CheckersWeb.Classes
     public class Game
     {
         private const int BOARDSIZE = 8;
-        private const int TILESIZE = 60;
-        private const int TOPMARGIN = 35;
-        private const int LEFTMARGIN = 35;
 
         public IEnumerable<GamePieceViewModel> InitBoard()
         {

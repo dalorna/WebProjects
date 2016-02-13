@@ -160,13 +160,17 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Classes\AICheckers.cs" />
+    <Compile Include="Classes\CellState.cs" />
     <Compile Include="Classes\Game.cs" />
     <Compile Include="Classes\GameState.cs" />
     <Compile Include="Classes\GridState.cs" />
     <Compile Include="Classes\PlayerMoves.cs" />
+    <Compile Include="Classes\PraetorianGame.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\CheckersController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
+    <Compile Include="Controllers\PraetorianController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -175,14 +179,43 @@
     <Compile Include="Models\GamePieceViewModel.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
+    <Compile Include="Models\PraetorianPieceViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\Assets\BlackKing.png" />
     <Content Include="Content\Assets\BlackPiece.png" />
+    <Content Include="Content\Assets\BlackTower.png" />
+    <Content Include="Content\Assets\Numbers\1.png" />
+    <Content Include="Content\Assets\Numbers\10.png" />
+    <Content Include="Content\Assets\Numbers\11.png" />
+    <Content Include="Content\Assets\Numbers\12.png" />
+    <Content Include="Content\Assets\Numbers\13.png" />
+    <Content Include="Content\Assets\Numbers\14.png" />
+    <Content Include="Content\Assets\Numbers\15.png" />
+    <Content Include="Content\Assets\Numbers\16.png" />
+    <Content Include="Content\Assets\Numbers\17.png" />
+    <Content Include="Content\Assets\Numbers\18.png" />
+    <Content Include="Content\Assets\Numbers\19.png" />
+    <Content Include="Content\Assets\Numbers\2.png" />
+    <Content Include="Content\Assets\Numbers\20.png" />
+    <Content Include="Content\Assets\Numbers\21.png" />
+    <Content Include="Content\Assets\Numbers\22.png" />
+    <Content Include="Content\Assets\Numbers\23.png" />
+    <Content Include="Content\Assets\Numbers\24.png" />
+    <Content Include="Content\Assets\Numbers\3.png" />
+    <Content Include="Content\Assets\Numbers\4.png" />
+    <Content Include="Content\Assets\Numbers\5.png" />
+    <Content Include="Content\Assets\Numbers\6.png" />
+    <Content Include="Content\Assets\Numbers\7.png" />
+    <Content Include="Content\Assets\Numbers\8.png" />
+    <Content Include="Content\Assets\Numbers\9.png" />
+    <Content Include="Content\Assets\Numbers\sizeRight.png" />
+    <Content Include="Content\Assets\PurpleTower.png" />
     <Content Include="Content\Assets\WhiteKing.png" />
     <Content Include="Content\Assets\WhitePiece.png" />
+    <Content Include="Content\Assets\WhiteTower.png" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\Checkers.css" />
@@ -274,6 +307,8 @@
     <Content Include="Views\Manage\VerifyPhoneNumber.cshtml" />
     <Content Include="Views\Shared\Lockout.cshtml" />
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
+    <Content Include="Views\Checkers\Index.cshtml" />
+    <Content Include="Views\Praetorian\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

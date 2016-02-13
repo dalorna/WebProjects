@@ -14,4 +14,13 @@ namespace CheckersWeb.Classes
         WHITEWIN = 4,
         DRAW = 5
     }
+
+    public enum PraetorianGameState
+    {
+        DEFAULTGAME = 0,
+        ASSASSINTURN = 1,
+        ROOKTURN = 2,
+        ASSASSINWIN =3,
+        ROOKWIN = 4
+    }
 }

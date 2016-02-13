@@ -18,7 +18,7 @@
     width: 220px;
 }
 
-.blackSquare, .whiteSquare {
+.blackSquare, .whiteSquare, redSquare {
     width: 75px;
     height: 75px;
     display: table-cell;
@@ -30,6 +30,10 @@
 
 .whiteSquare {
     background-color: white;
+    border: 1px solid black;
+}
+.redSquare {
+    background-color: red;
     border: 1px solid black;
 }
 
@@ -65,9 +69,6 @@
     border: 2px solid blue;
 }
 
-.blackImage {
-    background-image:;
-}
 .centerImage {
     display: block;
     margin-top: 10px;
