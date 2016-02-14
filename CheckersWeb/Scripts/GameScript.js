@@ -31,6 +31,9 @@ $(document).ready(function () {
             }
         });
     });
+
+
+    $('#appName').text("Checkers");
 });
 
 function allowDrop(ev) {

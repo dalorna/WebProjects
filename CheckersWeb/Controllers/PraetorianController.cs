@@ -17,7 +17,41 @@ namespace CheckersWeb.Controllers
         {
             var game = new PraetorianGame();
             Board = game.InitBoard();
-            return View();
+            var model = new PraetorianBoardViewModel()
+            {
+                Pieces = Board
+            };
+            return View(model);
+        }
+
+        /// <summary>
+        /// Index Method to start the game, basically we are seeing what side was choosen
+        /// </summary>
+        /// <param name="PlayerSideChoosen"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult StartGame(PraetorianGameState PlayerSideChoosen)
+        {
+            var jResult = new JsonResult();
+            return jResult;
+        }
+
+        /// <summary>
+        /// A move for the player
+        /// </summary>
+        /// <param name="fromPosition"></param>
+        /// <param name="toPosition"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult PlayerMove(string fromPosition, string toPosition)
+        {
+            var jResult = new JsonResult();
+            return jResult;
+        }
+
+        public JsonResult ComputerMove()
+        {
+            return new JsonResult();
         }
     }
 }

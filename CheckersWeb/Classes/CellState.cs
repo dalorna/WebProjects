@@ -32,7 +32,7 @@ namespace CheckersWeb.Classes
         TWENTYTWO = 22,
         TWENTYTHREE = 23,
         TWENTYFOUR = 24,
-        ROOK = 100
+        PRAETORIAN = 100
 
     }
 }

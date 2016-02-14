@@ -10,11 +10,10 @@ namespace CheckersWeb.Classes
     {
         private const int BOARDSIZE = 8;
         private int[] ranArray = new int[64];
+        public List<PraetorianPieceViewModel> Pieces = new List<PraetorianPieceViewModel>();
 
         public IEnumerable<PraetorianPieceViewModel> InitBoard()
         {
-            var Pieces = new List<PraetorianPieceViewModel>();
-
             for(int j = 1; j < 25; j++)
             {
                 GetRandomNumber(j);
@@ -27,18 +26,24 @@ namespace CheckersWeb.Classes
 
                 if ((iRow == 0 && iColumn == 0) || (iRow == 7 && iColumn == 7))
                 {
-                    Pieces.Add(new PraetorianPieceViewModel { Color = CellState.ROOK, Position = "sq_" + i, Index = i });
+                    Pieces.Add(new PraetorianPieceViewModel { Piece = CellState.PRAETORIAN, Position = "sq_" + i, Index = i });
                 }
                 else if (ranArray[i] != 0)
                 {
-                    Pieces.Add(new PraetorianPieceViewModel { Color = (CellState)Enum.Parse(typeof(CellState), ranArray[i].ToString()), Position = "sq_" + i, Index = i });
+                    Pieces.Add(new PraetorianPieceViewModel { Piece = (CellState)Enum.Parse(typeof(CellState), ranArray[i].ToString()), Position = "sq_" + i, Index = i });
                 }
                 else
                 {
 
-                        Pieces.Add(new PraetorianPieceViewModel { Color = CellState.EMPTY, Position = "sq_" + i, Index = i });
+                        Pieces.Add(new PraetorianPieceViewModel { Piece = CellState.EMPTY, Position = "sq_" + i, Index = i });
                 }
             }
+
+
+            int targetCount = Pieces.Where(w => w.IsTarget).Count();
+            var possT = Pieces.Where(w => w.Piece != CellState.PRAETORIAN && w.Piece != CellState.EMPTY).ToList();
+            SetTargets(possT);
+            SetAssassin(Pieces.Where(w => w.Piece != CellState.PRAETORIAN && w.Piece != CellState.EMPTY && w.IsTarget == false).ToList());
 
             return Pieces;
         }
@@ -56,6 +61,27 @@ namespace CheckersWeb.Classes
                 }
                 posBoard = ran.Next(1, 62);
             }
+        }
+
+        private void SetTargets(List<PraetorianPieceViewModel> possibleTargets)
+        {
+            Random ran = new Random();
+            int i = ran.Next(0, possibleTargets.Count);
+            possibleTargets[i].IsTarget = true;
+
+            if (Pieces.Where(w => w.IsTarget).Count() == 2)
+                return;
+
+            SetTargets(possibleTargets.Where(w => w.Piece != CellState.PRAETORIAN && w.Piece != CellState.EMPTY && w.IsTarget == false).ToList());
+
+       
+        }
+
+        private void SetAssassin(List<PraetorianPieceViewModel> possibleAssassins)
+        {
+            Random ran = new Random();
+            int i = ran.Next(0, possibleAssassins.Count);
+            possibleAssassins[i].IsAssassin = true;
         }
     }
 }

@@ -66,11 +66,6 @@ namespace CheckersWeb.Classes
 
             return Current;
         }
-
-        public Board GetInitNode()
-        {
-            return init;
-        }
     }
 
     public class Board

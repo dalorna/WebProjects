@@ -10,13 +10,17 @@ namespace CheckersWeb.Models
     {
         public string Position { get; set; }
 
-        public CellState Color { get; set; }
+        public CellState Piece { get; set; }
 
         public int Index { get; set; }
 
+        public bool IsTarget { get; set; }
+
+        public bool IsAssassin { get; set; }
+
         public override string ToString()
         {
-            return Position + " " + Color;
+            return Position + " " + Piece + " " + (IsAssassin ? "Assassin" : (IsTarget ? "Target" : "Pedestrian"));
         }
     }
 }

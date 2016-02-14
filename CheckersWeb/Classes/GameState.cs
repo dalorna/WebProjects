@@ -19,8 +19,8 @@ namespace CheckersWeb.Classes
     {
         DEFAULTGAME = 0,
         ASSASSINTURN = 1,
-        ROOKTURN = 2,
+        PRAETORIANTURN = 2,
         ASSASSINWIN =3,
-        ROOKWIN = 4
+        PRAETORIANWIN = 4
     }
 }
