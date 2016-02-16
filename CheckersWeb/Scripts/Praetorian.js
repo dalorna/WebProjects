@@ -1,8 +1,19 @@
-﻿$(document).ready(function () {
+﻿var gameState = "DEFAULTGAME";
+var playerChoice = "DEFAULTGAME";
+
+$(document).ajaxComplete(function () {
+    if (gameStatus != playerChoice || gameState != "DEFAULTGAME" || gameState != "ASSASSINWIN" || gameState != "PRAETORIANWIN") {
+        computerMove();
+    }
+});
+
+$(document).ready(function () {
     $('#appName').text("Praetorian");
 
     $("#btn").click(function () {
         var radio = $('#PraetorianForm input[type=radio]:checked');
+        playerChoice = radio.val();
+        radio.disabled = true;
 
         $.ajax({
             url: '/Praetorian/StartGame',
@@ -36,8 +47,12 @@ function drag(ev) {
 
 function drop(ev) {
     ev.preventDefault();
+    if (gameState == "DEFAULTGAME" || playerChoice != gameState)
+        return;
+
     var dat = ev.dataTransfer.getData("text");
     var id = ev.target.id.substring(3, 5);
+
     $.ajax({
         url: '/Praetorian/PlayerMove',
         type: 'POST',
@@ -53,6 +68,57 @@ function drop(ev) {
             alert(thrownError);
         }
     });
+}
 
-    ev.target.appendChild(document.getElementById(dat));
+function computerMove()
+{
+
+}
+
+function ShowBoard(data) {
+    var json = JSON.parse(data);
+    if (json.IsLegalMove) {
+        $('.centerImage').remove();
+
+        for (var i = 0; i < json.Pieces.length; i++) {
+            if (json.Pieces[i].Piece == 100) {
+                ShowPiece(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/PurpleTower.png", json.Pieces[i].Color);
+            }
+            else if (json.Pieces[i].Color > 0 && json.Pieces[i].Color < 100) {
+                ShowPiece(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/Numbers/" + json.Pieces[i].Color + ".png", json.Pieces[i].Color);
+            }
+        }
+
+        if (gameStatus == "ASSASSINTURN") {
+            gameStatus = "PRAETORIANTURN"
+        }
+        else if (gameStatus == "PRAETORIANTURN") {
+            gameStatus = "ASSASSINTURN";
+        }
+        else {
+            alert('GameStatus is not changing correctly make an adjustment');
+        }
+        $('#txtMessage').val($('#txtMessage').val() + ShowState(json.GameState) + '\r\n');
+
+        var sc = $('#txtMessage');
+        if (sc.length)
+            sc.scrollTop(sc[0].scrollHeight - sc.height());
+    }
+}
+
+function ShowState(i) {
+    switch (i) {
+        case 0:
+            return 'DEFAULTGAME';
+        case 1:
+            return 'ASSASSINTURN';
+        case 2:
+            return 'PRAETORIANTURN';
+        case 3:
+            return 'ASSASSINWIN';
+        case 4:
+            return 'PRAETORIANWIN';
+        case 5:
+            return 'DRAW'
+    }
 }

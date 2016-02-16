@@ -6,7 +6,7 @@ using System.Web;
 
 namespace CheckersWeb.Models
 {
-    public class PraetorianPieceViewModel
+    public class PraetorianPieceViewModel : AbstractCloneable
     {
         public string Position { get; set; }
 
@@ -18,9 +18,19 @@ namespace CheckersWeb.Models
 
         public bool IsAssassin { get; set; }
 
+        public bool HasBeenQuestions { get; set; }
+
         public override string ToString()
         {
             return Position + " " + Piece + " " + (IsAssassin ? "Assassin" : (IsTarget ? "Target" : "Pedestrian"));
+        }
+    }
+
+    public abstract class AbstractCloneable : ICloneable
+    {
+        public object Clone()
+        {
+            return this.MemberwiseClone();
         }
     }
 }

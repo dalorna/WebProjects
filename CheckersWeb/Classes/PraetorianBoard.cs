@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CheckersWeb.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -8,7 +9,9 @@ namespace CheckersWeb.Classes
     public class PraetorianBoard
     {
         public int _score = 0;
-        public CellState[] _boardArray;
+        //public CellState[] _boardArray;
+        public List<PraetorianPieceViewModel> _boardPieces;
+
         bool _mAssassinTurn;
 
         public bool GameOver
@@ -41,10 +44,10 @@ namespace CheckersWeb.Classes
                 new List<int> (){6, 14, 22, 30, 38, 50, 54, 62},
                 new List<int> (){7, 15, 23, 31, 39, 51, 55, 63} };
 
-        public PraetorianBoard(CellState[] valuesForBoardArray, bool AssassinTurn)
+        public PraetorianBoard(List<PraetorianPieceViewModel> boardPieces, bool AssassinTurn)
         {
             _mAssassinTurn = AssassinTurn;
-            _boardArray = valuesForBoardArray;
+            _boardPieces = boardPieces;
             ComputerScore();
         }
 
@@ -52,17 +55,22 @@ namespace CheckersWeb.Classes
         {
             int ret = 0;
             List<int> squares = new List<int>();
-            ret += GetOverallScore(_boardArray);
+            ret += GetOverallScore(_boardPieces);
             _score = ret;
         }
 
-        private int GetOverallScore(CellState[] bArray)
+        private int GetOverallScore(List<PraetorianPieceViewModel> boardPieces)
         {
             int countA = 0;
             int CountP = 0;
 
-            for (int i = 0; i < bArray.Count(); i++)
+            for (int i = 0; i < boardPieces.Count(); i++)
             {
+                //Calculate postion of Assassin to targets
+                //Calculate Praetorian to question new citizen
+                //Calculate # of Citizens Questioned
+                //Calculate targets down
+                //Calculate Praetorian Position to Assassin
             }
 
             if (_mAssassinTurn)
@@ -123,53 +131,160 @@ namespace CheckersWeb.Classes
             if (GameOver)
                 return true;
 
-            bool bMoveLeftForBlack = false;
-            bool bMoveLeftForWhite = false;
+            bool bMoveLeftForAssassin = false;
+            bool bMoveLeftForPraetorian = false;
 
 
             //Very important to determine 
             //If the assassin has been found
             //or if the targets are dead
-            for (int i = 0; i < _boardArray.Count(); i++)
+            for (int i = 0; i < _boardPieces.Count(); i++)
             {
-                var piece = _boardArray[i];
-                if (piece == CellState.PRAETORIAN || piece == CellState.EMPTY)
+                var piece = _boardPieces[i];
+                if (piece.Piece == CellState.PRAETORIAN || piece.Piece == CellState.EMPTY)
                     continue;
 
-                if ((piece == CellState.PRAETORIAN || piece == CellState.PRAETORIAN) && bMoveLeftForBlack == false)
+                if ((piece.Piece == CellState.PRAETORIAN || piece.Piece == CellState.PRAETORIAN) && bMoveLeftForAssassin == false)
                 {
-                    bMoveLeftForBlack = MoveForAssassin(piece, i).Count() > 0; 
+                    bMoveLeftForAssassin = MoveForAssassin(piece, i).Count() > 0; 
                 }
 
-                if ((piece == CellState.PRAETORIAN || piece == CellState.PRAETORIAN) && bMoveLeftForWhite == false)
+                if ((piece.Piece == CellState.PRAETORIAN || piece.Piece == CellState.PRAETORIAN) && bMoveLeftForPraetorian == false)
                 {
-                    bMoveLeftForWhite = MoveForPraetorian(piece, i).Count() > 0; 
+                    bMoveLeftForPraetorian = MoveForPraetorian(piece, i).Count() > 0; 
                 }
             }
 
-            return (_mAssassinTurn && !bMoveLeftForBlack) || (!_mAssassinTurn && !bMoveLeftForWhite);
+            return (_mAssassinTurn && !bMoveLeftForAssassin) || (!_mAssassinTurn && !bMoveLeftForPraetorian);
         }
 
-        public List<PraetorianBoard> MoveForAssassin(CellState piece, int i)
+        public List<PraetorianBoard> MoveForAssassin(PraetorianPieceViewModel piece, int i)
         {
-            return new List<PraetorianBoard>();
+            List<PraetorianBoard> PossibleBoards = new List<PraetorianBoard>();
+
+            if (_mAssassinTurn && ((piece.Piece == CellState.PRAETORIAN || piece.Piece == CellState.EMPTY) == false))
+            {
+                List<int> possibleMoves = new List<int>() { piece.Index - 9, piece.Index - 8, piece.Index - 7, piece.Index - 1, piece.Index + 1, piece.Index + 7, piece.Index + 8, piece.Index + 9 };
+
+                foreach(int iPosMove in possibleMoves)
+                {
+                    PraetorianPieceViewModel posPiece = _boardPieces.FirstOrDefault(f => f.Index == iPosMove);
+                    if ((posPiece != null && posPiece.Piece == CellState.EMPTY) == false)
+                        continue;
+                    var newBoard = _boardPieces.Clone().ToList();
+
+                    var to = newBoard[iPosMove];
+                    newBoard[iPosMove] = newBoard[i];
+                    newBoard[i] = to;
+
+                    PossibleBoards.Add(new PraetorianBoard(newBoard, !_mAssassinTurn));
+                }
+            }
+
+            return PossibleBoards;
         }
 
-        public List<PraetorianBoard> MoveForPraetorian(CellState piece, int i)
+        public List<PraetorianBoard> MoveForPraetorian(PraetorianPieceViewModel piece, int i)
         {
-            return new List<PraetorianBoard>();
+            List<PraetorianBoard> PossibleBoards = new List<PraetorianBoard>();
+            if (!_mAssassinTurn && piece.Piece == CellState.EMPTY == false)
+            {
+                if (piece.Piece != CellState.PRAETORIAN)
+                {
+                    List<int> possibleMoves = new List<int>() { piece.Index - 9, piece.Index - 8, piece.Index - 7, piece.Index - 1, piece.Index + 1, piece.Index + 7, piece.Index + 8, piece.Index + 9 };
+
+                    foreach (int iPosMove in possibleMoves)
+                    {
+                        PraetorianPieceViewModel posPiece = _boardPieces.FirstOrDefault(f => f.Index == iPosMove);
+                        if ((posPiece != null && posPiece.Piece == CellState.EMPTY) == false)
+                            continue;
+
+                        var newBoard = _boardPieces.Clone().ToList();
+                    
+                        var to = newBoard[iPosMove];
+                        newBoard[iPosMove] = newBoard[i];
+                        newBoard[i] = to;
+
+                        PossibleBoards.Add(new PraetorianBoard(newBoard, !_mAssassinTurn));
+                    }
+                }
+                else
+                {
+                    List<List<int>> linesToEvaluate = new List<List<int>>();
+                    linesToEvaluate = gameLines.FindAll(ByGridForPraetorian(_boardPieces[i].Piece, i));
+
+                    for (int f = 0; f < linesToEvaluate.Count; f++)
+                    {
+                        int iStart = linesToEvaluate[f].Find(ByInt(i));
+                        for(int index = iStart + 1; index < linesToEvaluate[f].Count; index++)
+                        {
+                            int iSpace = linesToEvaluate[f][index];
+                            if (_boardPieces[iSpace].Piece == CellState.EMPTY)
+                            {
+                                var newBoard = _boardPieces.Clone().ToList();
+                                var to = newBoard[iSpace];
+                                newBoard[iSpace] = newBoard[i];
+                                newBoard[i] = to;
+                                PossibleBoards.Add(new PraetorianBoard(newBoard, !_mAssassinTurn));
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                    }
+
+                    for (int b = linesToEvaluate.Count; b >= 0; b--)
+                    {
+                        int iStart = linesToEvaluate[b].Find(ByInt(i));
+                        for (int index = iStart  - 1; index >= 0; index--)
+                        {
+                            int iSpace = linesToEvaluate[b][index];
+                            if (_boardPieces[iSpace].Piece == CellState.EMPTY)
+                            {
+                                var newBoard = _boardPieces.Clone().ToList();
+                                var to = newBoard[iSpace];
+                                newBoard[iSpace] = newBoard[i];
+                                newBoard[i] = to;
+                                PossibleBoards.Add(new PraetorianBoard(newBoard, !_mAssassinTurn));
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            return PossibleBoards;
+        }
+
+        static Predicate<List<int>> ByGridForPraetorian(CellState entry, int i)
+        {
+            return delegate (List<int> x)
+            {
+                return x.FindIndex(ByInt(i)) > 0;
+            };
+        }
+
+        static Predicate<int> ByInt(int iNumb)
+        {
+            return delegate (int y)
+            {
+                return y == iNumb;
+            };
         }
 
         public List<PraetorianBoard> GetChildren()
         {
             List<PraetorianBoard> PossibleBoards = new List<PraetorianBoard>();
-            for (int i = 0; i < _boardArray.Length; i++)
+            for (int i = 0; i < _boardPieces.Count(); i++)
             {
-                if (_boardArray[i] != CellState.PRAETORIAN && _boardArray[i] != CellState.EMPTY)
+                if (_boardPieces[i].Piece != CellState.PRAETORIAN && _boardPieces[i].Piece != CellState.EMPTY)
                 {
-                    PossibleBoards.AddRange(MoveForAssassin(_boardArray[i], i));
+                    PossibleBoards.AddRange(MoveForAssassin(_boardPieces[i], i));
 
-                    PossibleBoards.AddRange(MoveForPraetorian(_boardArray[i], i));
+                    PossibleBoards.AddRange(MoveForPraetorian(_boardPieces[i], i));
                 }
             }
 
@@ -189,10 +304,10 @@ namespace CheckersWeb.Classes
         public PraetorianBoard Current { get; private set; }
         PraetorianBoard init;
 
-        public PraetorianGameSetup(CellState[] testBoard)
+        public PraetorianGameSetup(List<PraetorianPieceViewModel> boardPieces)
         {
-            CellState[] values = testBoard;
-            init = new PraetorianBoard(values, true);
+            List<PraetorianPieceViewModel> boardPiecesvalues = boardPieces;
+            init = new PraetorianBoard(boardPiecesvalues, true);
             Current = init;
         }
 
@@ -203,6 +318,14 @@ namespace CheckersWeb.Classes
                 Current = next;
 
             return Current;
+        }
+    }
+
+    public static class Extensions
+    {
+        public static IList<T> Clone<T>(this IList<T> listToClone) where T : ICloneable
+        {
+            return listToClone.Select(item => (T)item.Clone()).ToList();
         }
     }
 }
