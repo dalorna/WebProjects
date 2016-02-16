@@ -14,6 +14,8 @@ namespace CheckersWeb.Models
 
         public string Message { get; set; }
 
+        public bool IsAssassinComputer { get; set; }
+
         public IEnumerable<PraetorianPieceViewModel> Pieces { get; set; }
     }
 }

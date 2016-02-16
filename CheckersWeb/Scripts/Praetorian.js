@@ -2,7 +2,7 @@
 var playerChoice = "DEFAULTGAME";
 
 $(document).ajaxComplete(function () {
-    if (gameStatus != playerChoice || gameState != "DEFAULTGAME" || gameState != "ASSASSINWIN" || gameState != "PRAETORIANWIN") {
+    if (gameState != playerChoice && (gameState == "DEFAULTGAME" || gameState == "ASSASSINWIN" || gameState == "PRAETORIANWIN") == false) {
         computerMove();
     }
 });
@@ -19,10 +19,11 @@ $(document).ready(function () {
             url: '/Praetorian/StartGame',
             type: 'POST',
             data: {
-                PlayerSideChoosen: radio.val()
+                playerSideChoosen: radio.val()
             },
             dataType: "html",
             success: function (data) {
+                ShowBoard(data, true);
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 alert(xhr.status);
@@ -32,8 +33,12 @@ $(document).ready(function () {
     });
 });
 
-function ShowPositions(id, pos, img, color) {
-    $(id).prepend('<img class="centerImage highlightNumber" alt=' + color + ' id="' + pos + '" src="' + img + '" draggable="true" ondragstart="drag(event)" />');
+function ShowPositions(id, index, img, color) {
+    $(id).prepend('<img class="centerImage highlightNumber" alt=' + color + ' id="' + index + '" src="' + img + '" draggable="true" ondragstart="drag(event)" />');
+};
+
+function ShowPositionsPost(id, index, img, color) {
+    $('#' + id).prepend('<img class="centerImage highlightNumber" alt=' + color + ' id="' + index + '" src="' + img + '" draggable="true" ondragstart="drag(event)" />');
 };
 
 function allowDrop(ev) {
@@ -59,9 +64,11 @@ function drop(ev) {
         data: {
             fromPosition: movingPiece.id,
             toPosition: id,
+            playerSideChoosen: playerChoice
         },
         dataType: "html",
         success: function (data) {
+            ShowBoard(data, false);
         },
         error: function (xhr, ajaxOptions, thrownError) {
             alert("statusPlayer: " + xhr.status);
@@ -72,38 +79,61 @@ function drop(ev) {
 
 function computerMove()
 {
-
+    $.ajax({
+        url: '/Praetorian/ComputerMove',
+        type: 'POST',
+        data: {
+            playerSideChoosen: playerChoice
+        },
+        dataType: "html",
+        success: function (data) {
+            ShowBoard(data, false);
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert("statusComputer: " + xhr.status);
+            alert(thrownError);
+        }
+    });
 }
 
-function ShowBoard(data) {
+function ShowBoard(data, gameStart) {
     var json = JSON.parse(data);
     if (json.IsLegalMove) {
         $('.centerImage').remove();
 
         for (var i = 0; i < json.Pieces.length; i++) {
             if (json.Pieces[i].Piece == 100) {
-                ShowPiece(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/PurpleTower.png", json.Pieces[i].Color);
+                ShowPositionsPost(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/PurpleTower.png", "PRAETORIAN");
             }
-            else if (json.Pieces[i].Color > 0 && json.Pieces[i].Color < 100) {
-                ShowPiece(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/Numbers/" + json.Pieces[i].Color + ".png", json.Pieces[i].Color);
+            else if (json.Pieces[i].Piece > 0 && json.Pieces[i].Piece < 100) {
+                ShowPositionsPost(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/Numbers/" + json.Pieces[i].Piece + ".png", json.Pieces[i].Piece);
             }
         }
 
-        if (gameStatus == "ASSASSINTURN") {
-            gameStatus = "PRAETORIANTURN"
-        }
-        else if (gameStatus == "PRAETORIANTURN") {
-            gameStatus = "ASSASSINTURN";
+        ChangeSides(json.GameState, gameStart);
+    }
+}
+
+function ChangeSides(sideMoved, gameStart) {
+
+    if (gameStart) {
+        gameState = ShowState(sideMoved);
+        $('#txtMessage').val($('#txtMessage').val() + ShowState(sideMoved) + '\r\n');
+    }
+    else {
+        if ((ShowState(sideMoved) == "DEFAULTGAME" || ShowState(sideMoved) == "ASSASSINWIN" || ShowState(sideMoved) == "PRAETORIANWIN") == false) {
+            gameState = ShowState(sideMoved);
+            $('#txtMessage').val($('#txtMessage').val() + ShowState(sideMoved) + '\r\n');
         }
         else {
-            alert('GameStatus is not changing correctly make an adjustment');
+            $('#txtMessage').val($('#txtMessage').val() + ShowState(sideMoved) + '\r\n');
+            gameState = "DEFAULTGAME";
+            playerChoice = "DEFAULTGAME";
         }
-        $('#txtMessage').val($('#txtMessage').val() + ShowState(json.GameState) + '\r\n');
-
-        var sc = $('#txtMessage');
-        if (sc.length)
-            sc.scrollTop(sc[0].scrollHeight - sc.height());
     }
+    var sc = $('#txtMessage');
+    if (sc.length)
+        sc.scrollTop(sc[0].scrollHeight - sc.height());
 }
 
 function ShowState(i) {

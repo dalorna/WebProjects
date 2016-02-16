@@ -18,11 +18,21 @@ namespace CheckersWeb.Models
 
         public bool IsAssassin { get; set; }
 
-        public bool HasBeenQuestions { get; set; }
+        public bool HasBeenQuestioned { get; set; }
+
+        public bool IsDead { get; set; }
+
+        public bool IsCaught { get; set; }
+
+        public List<int> MovesMade { get; set; }
 
         public override string ToString()
         {
-            return Position + " " + Piece + " " + (IsAssassin ? "Assassin" : (IsTarget ? "Target" : "Pedestrian"));
+            string desc = (IsAssassin ? "Assassin" : (IsTarget ? "Target" : "Pedestrian"));
+            if (Piece == CellState.EMPTY || Piece == CellState.PRAETORIAN)
+                desc = string.Empty;
+
+            return Position + " " + Piece + " " + desc;
         }
     }
 
