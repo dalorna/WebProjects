@@ -178,7 +178,7 @@ namespace CheckersWeb.Classes
             return capturedAssassin || deadTargets;
         }
 
-        private void SwapPosition(List<PraetorianPieceViewModel> model, int ito, int ifrom)
+        public static void SwapPosition(List<PraetorianPieceViewModel> model, int ito, int ifrom)
         {
             var to = model[ito];
             var from = model[ifrom];
@@ -218,6 +218,7 @@ namespace CheckersWeb.Classes
                 var newBoard = _boardPieces.Clone().ToList();
 
                 SwapPosition(newBoard, iPosMove, i);
+                newBoard = newBoard.OrderBy(o => o.Index).ToList();
                 PossibleBoards.Add(new PraetorianBoard(newBoard, !_mAssassinTurn));
             }
 
@@ -262,6 +263,7 @@ namespace CheckersWeb.Classes
 
 
                                 SwapPosition(newBoard, iSpace, i);
+                                newBoard = newBoard.OrderBy(o => o.Index).ToList();
                                 PossibleBoards.Add(new PraetorianBoard(newBoard, !_mAssassinTurn));
                             }
                             else
@@ -282,6 +284,7 @@ namespace CheckersWeb.Classes
                                 var newBoard = _boardPieces.Clone().ToList();
 
                                 SwapPosition(newBoard, iSpace, i);
+                                newBoard = newBoard.OrderBy(o => o.Index).ToList();
                                 PossibleBoards.Add(new PraetorianBoard(newBoard, !_mAssassinTurn));
                             }
                             else
@@ -295,7 +298,7 @@ namespace CheckersWeb.Classes
             return PossibleBoards;
         }
 
-        static Predicate<List<int>> ByGridForPraetorian(int i)
+        public static Predicate<List<int>> ByGridForPraetorian(int i)
         {
             return delegate (List<int> x)
             {
@@ -304,7 +307,7 @@ namespace CheckersWeb.Classes
             };
         }
 
-        static Predicate<int> ByInt(int iNumb)
+        public static Predicate<int> ByInt(int iNumb)
         {
             return delegate (int y)
             {
