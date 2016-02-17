@@ -78,11 +78,7 @@ namespace CheckersWeb.Controllers
                     linesToEvaluate.AddRange(PraetorianBoard.diagonalLines.FindAll(PraetorianBoard.ByGridForPraetorian(piece.Index)));
 
                     int iPossible = possibleMoves.Find(PraetorianBoard.ByInt(int.Parse(toPosition)));
-
                     int iIndex = possibleMoves.FindIndex(PraetorianBoard.ByInt(int.Parse(toPosition)));
-                    //var somethingHere = possibleMoves.FindAll(PraetorianBoard.ByInt(int.Parse(toPosition)));
-                    //int iPossible = possibleMoves.Find(PraetorianBoard.ByInt(iIndex));
-
 
                     var possibleLine = linesToEvaluate.FindAll(PraetorianBoard.ByGridForPraetorian(iPossible));
                     if (possibleLine.Count >= 1 && iIndex > 0)
@@ -100,7 +96,6 @@ namespace CheckersWeb.Controllers
                                 var piecesBefore = _Board.Pieces.ToList().Clone();
                                 PraetorianBoard.SwapPosition(_Board.Pieces.ToList(), iPossible, piece.Index);
                                 _Board.Pieces = _Board.Pieces.OrderBy(o => o.Index);
-
                                 _Board.GameState = PraetorianGameState.PRAETORIANTURN;
                                 bIsLegal = true;
                             }
@@ -112,7 +107,89 @@ namespace CheckersWeb.Controllers
             }
             else
             {
-                _Board.GameState = PraetorianGameState.ASSASSINTURN;
+                PraetorianPieceViewModel piece = _Board.Pieces.ToList().First(f => f.Position == "sq_" + fromPosition);
+                if (piece.Piece != CellState.PRAETORIAN)
+                {
+                    List<int> possibleMoves = new List<int>() { piece.Index - 9, piece.Index - 8, piece.Index - 7, piece.Index - 1, piece.Index + 1, piece.Index + 7, piece.Index + 8, piece.Index + 9 };
+                    List<List<int>> linesToEvaluate = new List<List<int>>();
+                    linesToEvaluate.AddRange(PraetorianBoard.gameLines.FindAll(PraetorianBoard.ByGridForPraetorian(piece.Index)));
+                    linesToEvaluate.AddRange(PraetorianBoard.diagonalLines.FindAll(PraetorianBoard.ByGridForPraetorian(piece.Index)));
+
+                    int iPossible = possibleMoves.Find(PraetorianBoard.ByInt(int.Parse(toPosition)));
+                    int iIndex = possibleMoves.FindIndex(PraetorianBoard.ByInt(int.Parse(toPosition)));
+
+                    var possibleLine = linesToEvaluate.FindAll(PraetorianBoard.ByGridForPraetorian(iPossible));
+                    if (possibleLine.Count >= 1 && iIndex > 0)
+                    {
+                        if (possibleLine.Count > 1)
+                        {
+                            throw new Exception("Possible lines count was greater 1");
+                        }
+
+                        if (Math.Abs(possibleLine[0].FindIndex(PraetorianBoard.ByInt(iPossible)) - possibleLine[0].FindIndex(PraetorianBoard.ByInt(piece.Index))) == 1)
+                        {
+                            PraetorianPieceViewModel posPiece = _Board.Pieces.FirstOrDefault(f => f.Index == iPossible);
+                            if (posPiece != null && posPiece.Piece == CellState.EMPTY)
+                            {
+                                var piecesBefore = _Board.Pieces.ToList().Clone();
+                                PraetorianBoard.SwapPosition(_Board.Pieces.ToList(), iPossible, piece.Index);
+                                _Board.Pieces = _Board.Pieces.OrderBy(o => o.Index);
+                                _Board.GameState = PraetorianGameState.ASSASSINTURN;
+                                bIsLegal = true;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    List<List<int>> linesToEvaluate = new List<List<int>>();
+                    linesToEvaluate = PraetorianBoard.gameLines.FindAll(PraetorianBoard.ByGridForPraetorian(piece.Index));
+
+                    for (int f = 0; f < linesToEvaluate.Count; f++)
+                    {
+                        int iStart = linesToEvaluate[f].FindIndex(PraetorianBoard.ByInt(piece.Index));
+                        int iFrom = linesToEvaluate[f].FindIndex(PraetorianBoard.ByInt(int.Parse(toPosition)));
+                        int iTo = linesToEvaluate[f].FindIndex(PraetorianBoard.ByInt(int.Parse(fromPosition)));
+
+                        for (int index = iStart + 1; index < linesToEvaluate[f].Count; index++)
+                        {
+                            int iSpace = linesToEvaluate[f][index];
+                            if (_Board.Pieces.ToList()[iSpace].Piece == CellState.EMPTY)
+                            {
+                                //var newBoard = _Board.Pieces.ToList().Clone().ToList();
+                                //PraetorianBoard.SwapPosition(_Board.Pieces.ToList(), iSpace, piece.Index);
+                                //_Board.Pieces = _Board.Pieces.OrderBy(o => o.Index);
+                                //_Board.GameState = PraetorianGameState.PRAETORIANTURN;
+                                bIsLegal = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    for (int b = linesToEvaluate.Count - 1; b >= 0; b--)
+                    {
+                        int iStart = linesToEvaluate[b].FindIndex(PraetorianBoard.ByInt(piece.Index));
+                        for (int index = iStart - 1; index >= 0; index--)
+                        {
+                            int iSpace = linesToEvaluate[b][index];
+                            if (_Board.Pieces.ToList()[iSpace].Piece == CellState.EMPTY)
+                            {
+                                //var newBoard = _Board.Pieces.ToList().Clone().ToList();
+                                //PraetorianBoard.SwapPosition(_Board.Pieces.ToList(), iSpace, piece.Index);
+                                //_Board.Pieces = _Board.Pieces.OrderBy(o => o.Index);
+                                //_Board.GameState = PraetorianGameState.PRAETORIANTURN;
+                                bIsLegal = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if(bIsLegal)
+                    {
+
+                    }
+                }
+
                 _Board.IsLegalMove = bIsLegal;
             }
 
