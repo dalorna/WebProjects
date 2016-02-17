@@ -65,8 +65,14 @@ namespace CheckersWeb.Controllers
             var jResult = new JsonResult();
             bool bIsLegal = false;
 
+            if (string.IsNullOrEmpty(toPosition))
+            {
+                _Board.IsLegalMove = bIsLegal;
+                return Json(_Board);
+            }
+
             //Regardless of the playersideChoosen we just need to know that it was a legal move
-            if(playerSideChoosen == PraetorianGameState.ASSASSINTURN && string.IsNullOrEmpty(toPosition) == false)
+            if(playerSideChoosen == PraetorianGameState.ASSASSINTURN )
             {
                 PraetorianPieceViewModel piece = _Board.Pieces.ToList().First(f => f.Position == "sq_" + fromPosition);
 
@@ -81,7 +87,7 @@ namespace CheckersWeb.Controllers
                     int iIndex = possibleMoves.FindIndex(PraetorianBoard.ByInt(int.Parse(toPosition)));
 
                     var possibleLine = linesToEvaluate.FindAll(PraetorianBoard.ByGridForPraetorian(iPossible));
-                    if (possibleLine.Count >= 1 && iIndex > 0)
+                    if (possibleLine.Count >= 1 && iIndex >= 0)
                     {
                         if (possibleLine.Count > 1)
                         {
@@ -119,11 +125,11 @@ namespace CheckersWeb.Controllers
                     int iIndex = possibleMoves.FindIndex(PraetorianBoard.ByInt(int.Parse(toPosition)));
 
                     var possibleLine = linesToEvaluate.FindAll(PraetorianBoard.ByGridForPraetorian(iPossible));
-                    if (possibleLine.Count >= 1 && iIndex > 0)
+                    if (possibleLine.Count >= 1 && iIndex >= 0)
                     {
                         if (possibleLine.Count > 1)
                         {
-                            throw new Exception("Possible lines count was greater 1");
+                            throw new Exception("Possible lines count was greater than 1");
                         }
 
                         if (Math.Abs(possibleLine[0].FindIndex(PraetorianBoard.ByInt(iPossible)) - possibleLine[0].FindIndex(PraetorianBoard.ByInt(piece.Index))) == 1)
@@ -145,40 +151,51 @@ namespace CheckersWeb.Controllers
                     List<List<int>> linesToEvaluate = new List<List<int>>();
                     linesToEvaluate = PraetorianBoard.gameLines.FindAll(PraetorianBoard.ByGridForPraetorian(piece.Index));
 
-                    for (int f = 0; f < linesToEvaluate.Count; f++)
+                    var possLine = linesToEvaluate.FindAll(findLine(int.Parse(fromPosition), int.Parse(toPosition)));
+                    if(possLine.Count != 1)
                     {
-                        int iStart = linesToEvaluate[f].FindIndex(PraetorianBoard.ByInt(piece.Index));
-                        int iFrom = linesToEvaluate[f].FindIndex(PraetorianBoard.ByInt(int.Parse(toPosition)));
-                        int iTo = linesToEvaluate[f].FindIndex(PraetorianBoard.ByInt(int.Parse(fromPosition)));
-
-                        for (int index = iStart + 1; index < linesToEvaluate[f].Count; index++)
+                        if(possLine.Count == 0)
                         {
-                            int iSpace = linesToEvaluate[f][index];
+                            _Board.IsLegalMove = bIsLegal;
+                            return Json(_Board);
+                        }
+                        else
+                        {
+                            throw new Exception("Possible lines count was greater than 1");
+                        }
+                    }
+
+                    int iFrom = possLine[0].FindIndex(PraetorianBoard.ByInt(int.Parse(fromPosition)));
+                    int iTo = possLine[0].FindIndex(PraetorianBoard.ByInt(int.Parse(toPosition)));
+                    int iSpace = 0;
+                    if (int.Parse(fromPosition) < int.Parse(toPosition))
+                    {
+                        for (int index = iFrom + 1; index <= iTo; index++)
+                        {
+                            iSpace = possLine[0][index];
                             if (_Board.Pieces.ToList()[iSpace].Piece == CellState.EMPTY)
                             {
-                                //var newBoard = _Board.Pieces.ToList().Clone().ToList();
-                                //PraetorianBoard.SwapPosition(_Board.Pieces.ToList(), iSpace, piece.Index);
-                                //_Board.Pieces = _Board.Pieces.OrderBy(o => o.Index);
-                                //_Board.GameState = PraetorianGameState.PRAETORIANTURN;
                                 bIsLegal = true;
+                            }
+                            else
+                            {
+                                bIsLegal = false;
                                 break;
                             }
                         }
                     }
-
-                    for (int b = linesToEvaluate.Count - 1; b >= 0; b--)
+                    else
                     {
-                        int iStart = linesToEvaluate[b].FindIndex(PraetorianBoard.ByInt(piece.Index));
-                        for (int index = iStart - 1; index >= 0; index--)
+                        for (int index = iFrom - 1; index >= iTo; index--)
                         {
-                            int iSpace = linesToEvaluate[b][index];
+                            iSpace = possLine[0][index];
                             if (_Board.Pieces.ToList()[iSpace].Piece == CellState.EMPTY)
                             {
-                                //var newBoard = _Board.Pieces.ToList().Clone().ToList();
-                                //PraetorianBoard.SwapPosition(_Board.Pieces.ToList(), iSpace, piece.Index);
-                                //_Board.Pieces = _Board.Pieces.OrderBy(o => o.Index);
-                                //_Board.GameState = PraetorianGameState.PRAETORIANTURN;
                                 bIsLegal = true;
+                            }
+                            else
+                            {
+                                bIsLegal = false;
                                 break;
                             }
                         }
@@ -186,7 +203,10 @@ namespace CheckersWeb.Controllers
 
                     if(bIsLegal)
                     {
-
+                        var newBoard = _Board.Pieces.ToList().Clone().ToList();
+                        PraetorianBoard.SwapPosition(_Board.Pieces.ToList(), int.Parse(toPosition), int.Parse(fromPosition));
+                        _Board.Pieces = _Board.Pieces.OrderBy(o => o.Index);
+                        _Board.GameState = PraetorianGameState.ASSASSINTURN;
                     }
                 }
 
@@ -195,6 +215,16 @@ namespace CheckersWeb.Controllers
 
             jResult = Json(_Board);
             return jResult;
+        }
+
+        public static Predicate<List<int>> findLine(int ifrom, int ito)
+        {
+            return delegate(List<int> x)
+            {
+                var bFrom = x.FindIndex(PraetorianBoard.ByInt(ifrom)) >= 0;
+                var bTo = x.FindIndex(PraetorianBoard.ByInt(ito)) >= 0;
+                return bFrom && bTo;
+            };
         }
 
         public JsonResult ComputerMove(PraetorianGameState playerSideChoosen)
@@ -222,11 +252,64 @@ namespace CheckersWeb.Controllers
             return jResult;
         }
 
-        public JsonResult Interrogate(string positionQuestioned)
+        public JsonResult Interrogate(PraetorianPieceViewModel positionQuestioned)
         {
-            var jResult = new JsonResult();
-            jResult = Json(_Board);
-            return jResult;
+            if (positionQuestioned.IsAssassin)
+            {
+                _Board.Pieces.First(w => w.Position == positionQuestioned.Position).IsCaught = true;
+                _Board.GameState = PraetorianGameState.PRAETORIANWIN;
+            }
+            else
+            {
+                _Board.Pieces.First(w => w.Position == positionQuestioned.Position).HasBeenQuestioned = true;
+                _Board.GameState = PraetorianGameState.ASSASSINTURN;
+            }
+
+            return Json(_Board);
+        }
+
+        public JsonResult Assassinate(PraetorianPieceViewModel positionKilled)
+        {
+            if (positionKilled.IsTarget == false)
+                throw new Exception("Not a target... Something is wrong");
+
+            var target = _Board.Pieces.FirstOrDefault(f => f.Index == positionKilled.Index && f.IsTarget);
+            if(target != null)
+            {
+                int indexOfTarget = _Board.Pieces.ToList().FindIndex(findPiece(target));
+                var newBoard = _Board.Pieces.ToList();
+                
+                newBoard[indexOfTarget].HasBeenQuestioned = false;
+                newBoard[indexOfTarget].Index = indexOfTarget;
+                newBoard[indexOfTarget].Position = _Board.Pieces.ToList()[indexOfTarget].Position;
+                newBoard[indexOfTarget].IsAssassin = false;
+                newBoard[indexOfTarget].IsDead = false;
+                newBoard[indexOfTarget].IsTarget = false;
+                newBoard[indexOfTarget].Piece = CellState.EMPTY;
+                newBoard[indexOfTarget].IsCaught = false;
+                newBoard[indexOfTarget].MovesMade = new List<int>();
+
+                _Board.Pieces = newBoard;
+            }
+
+            if (_Board.Pieces.Where(w => w.IsTarget).Count() > 0)
+            {
+                _Board.GameState = PraetorianGameState.PRAETORIANTURN;
+            }
+            else
+            {
+                _Board.GameState = PraetorianGameState.ASSASSINWIN;
+            }
+            
+            return Json(_Board);
+        }
+
+        public static Predicate<PraetorianPieceViewModel> findPiece(PraetorianPieceViewModel piece)
+        {
+            return delegate(PraetorianPieceViewModel find)
+            {
+                return find.Equals(piece);
+            };
         }
     }
 }

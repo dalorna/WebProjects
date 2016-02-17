@@ -93,22 +93,32 @@
             </div>
         </div>
         <div class="gameInfo">
+            <label>Game messages</label>
             <textarea readonly id="txtMessage" class="gamePraeText"></textarea>
+            <label id="lblPlayer" style="margin-top: 10px;">Questioned Pieces</label>
+            <textarea readonly id="txtMoves" class="moveText"></textarea>
             <fieldset>
                 <legend>Game Selection</legend>
-                <label for="Assassin">Assassin</label>
-                <input type="radio" name="sideSelection" value="ASSASSINTURN" id="Assassin" />
-                <label style="margin-left: 20px;" for="Praetorain">Praetorian</label>
-                <input type="radio" name="sideSelection" value="PRAETORIANTURN" id="Praetorain" checked="checked" />
+                <label for="btnAssassin">Assassin</label>
+                <input type="radio" name="sideSelection" value="ASSASSINTURN" id="btnAssassin" onchange="aChange(this)" />
+                <label style="margin-left: 20px;" for="btnPraetorain">Praetorian</label>
+                <input type="radio" name="sideSelection" value="PRAETORIANTURN" id="btnPraetorain" onchange="aChange(this)" checked="checked" />
             </fieldset>
             <button id="btn" class="startButton" value="Button" type="button">Start Game</button>
             <button id="btnInterrogate" class="startButton" value="Button" type="button">Interrogate</button>
+            <button id="btnAssassinate" class="startButton hidden" value="Button" type="button">Assassinate</button>
         </div>
     </section>
-    <div>
+    <footer>
         Icon made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a> is licensed under <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0">CC BY 3.0</a>
-    </div>
+    </footer>
 </form>
+<script type="text/javascript">
+    $(document).ready(function (){
+        SetBoard(@Html.Raw(Json.Encode(Model)));
+    });
+</script>
+
 @foreach (var m in Model.Pieces)
 {
     if (m.Piece == (CellState)Enum.Parse(typeof(CellState), "PRAETORIAN"))
