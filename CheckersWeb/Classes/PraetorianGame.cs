@@ -26,11 +26,11 @@ namespace CheckersWeb.Classes
 
                 if ((iRow == 0 && iColumn == 0) || (iRow == 7 && iColumn == 7))
                 {
-                    Pieces.Add(new PraetorianPieceViewModel { Piece = CellState.PRAETORIAN, Position = "sq_" + i, Index = i });
+                    Pieces.Add(new PraetorianPieceViewModel { Piece = CellState.PRAETORIAN, Position = "sq_" + i, Index = i, MovesMade = new List<int>() { i } });
                 }
                 else if (ranArray[i] != 0)
                 {
-                    Pieces.Add(new PraetorianPieceViewModel { Piece = (CellState)Enum.Parse(typeof(CellState), ranArray[i].ToString()), Position = "sq_" + i, Index = i });
+                    Pieces.Add(new PraetorianPieceViewModel { Piece = (CellState)Enum.Parse(typeof(CellState), ranArray[i].ToString()), Position = "sq_" + i, Index = i, MovesMade = new List<int>() { i } });
                 }
                 else
                 {

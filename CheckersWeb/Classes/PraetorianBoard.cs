@@ -1,6 +1,7 @@
 ﻿using CheckersWeb.Models;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Web;
 
@@ -24,6 +25,13 @@ namespace CheckersWeb.Classes
         {
             get;
             private set;
+        }
+
+        public PraetorianBoard(List<PraetorianPieceViewModel> boardPieces, bool AssassinTurn)
+        {
+            _mAssassinTurn = AssassinTurn;
+            _boardPieces = boardPieces;
+            ComputerScore();
         }
 
         public static List<List<int>> gameLines = new List<List<int>>()
@@ -73,12 +81,6 @@ namespace CheckersWeb.Classes
                 new List<int>() {6, 15, -100, -100, -100, -100, -100, -100 }
         };
 
-        public PraetorianBoard(List<PraetorianPieceViewModel> boardPieces, bool AssassinTurn)
-        {
-            _mAssassinTurn = AssassinTurn;
-            _boardPieces = boardPieces;
-            ComputerScore();
-        }
 
         public void ComputerScore()
         {
@@ -90,25 +92,36 @@ namespace CheckersWeb.Classes
 
         private int GetOverallScore(List<PraetorianPieceViewModel> boardPieces)
         {
-            int countA = 0;
-            int CountP = 0;
+            int iboardScore = 10000;//Start with 1k to attempt to avoid positive and negative numbers getting reversed Alpha should be a postive number and beta should be negative
+            double longestDistance = Distance.Euclidean(new Point(0, 0), new Point(7, 7));
 
-            for (int i = 0; i < boardPieces.Count(); i++)
-            {
-                //Calculate postion of Assassin to targets
-                //Calculate Praetorian to question new citizen
-                //Calculate # of Citizens Questioned
-                //Calculate targets down
-                //Calculate Praetorian Position to Assassin
-                //Calculate how many times a piece has moved and unquestioned for possible assassin...
-            }
+            var assassin = boardPieces.First(f => f.IsAssassin);
+            var aPoint = new Point(assassin.Index / 8, assassin.Index % 8);
+            var targets = boardPieces.Where(w => w.IsTarget).ToList();
+            var cops = boardPieces.Where(w => w.Piece == CellState.PRAETORIAN).ToList();
 
+          
             if (_mAssassinTurn)
             {
-                return countA + CountP;
+                if (targets.Count == 2) iboardScore += 100;
+                else if (targets.Count == 1) iboardScore += 1000;
+                else { iboardScore += 1000000; GameOver = true; }
+
+                targets.ForEach(e => iboardScore += Distance.DistanceScore(longestDistance, Distance.Euclidean(aPoint, new Point(e.Index / 8, e.Index % 8))));
+
+                //Calculate Praetorian Position to Assassin
+                //Calculate how many times a piece has moved and could be considered a possible assassin
+                //Calculate can kill to hide identity
+
+                return iboardScore;
             }
 
-            return -(countA + CountP);
+            //Calculate Praetorian to question new citizen
+            //Calculate # of Citizens Questioned
+            //Calculate targets down
+            //Calculate how many times a piece has moved and unquestioned for possible assassin...
+
+            return -(iboardScore);
         }
 
         public int MiniMaxWithDebug(int depth, bool needMax, int alpha, int beta, out PraetorianBoard childWithMax)
@@ -183,6 +196,8 @@ namespace CheckersWeb.Classes
             to.Index = tempIndex;
             model[ito] = from;
             model[ifrom] = to;
+
+            model[ito].MovesMade.Add(ito);
         }
 
         private List<PraetorianBoard> MoveNumberPiece(PraetorianPieceViewModel piece, int i)
@@ -478,6 +493,34 @@ namespace CheckersWeb.Classes
         public static IList<T> Clone<T>(this IList<T> listToClone) where T : ICloneable
         {
             return listToClone.Select(item => (T)item.Clone()).ToList();
+        }
+    }
+
+    public static class Distance
+    {
+        /// <summary>
+        /// Return the distance between 2 points
+        /// </summary>
+        public static double Euclidean(Point p1, Point p2)
+        {
+            return Math.Sqrt(Math.Pow(p1.X - p2.X, 2) + Math.Pow(p1.Y - p2.Y, 2));
+        }
+
+        /// <summary>
+        /// Calculates the similarity between 2 points using Euclidean distance.
+        /// Returns a value between 0 and 1 where 1 means they are identical
+        /// </summary>
+        public static double EuclideanSimilarity(Point p1, Point p2)
+        {
+            return 1 / (1 + Euclidean(p1, p2));
+        }
+
+        public static int DistanceScore(double topScore, double distance)
+        {
+            int startScore = 100;
+
+            startScore = startScore * ((int)(topScore/distance));
+            return startScore;
         }
     }
 }
