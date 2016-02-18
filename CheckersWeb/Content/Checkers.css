@@ -56,17 +56,7 @@
     margin-top: 10px;
 }
 
-.highlight {
-    border: 1px solid red;
-}
 
-.highlightO {
-    border: 3px solid #ffd800;
-}
-
-.highlightClick{
-    border: 2px solid blue;
-}
 
 .centerImage {
     display: block;
@@ -96,13 +86,28 @@
     width: 400px;
     
 }
-.highlightNumber {
-    border: 1px solid #7a7474;
-}
-.highlightSuspect {
-    border: 3px solid #146704;
-}
-
 .hidden{
     display: none;
+}
+
+.highlight {
+    border: 1px solid red;
+}
+
+.highlightO {
+    border: 3px solid #ffd800;
+}
+
+.highlightClick{
+    border: 2px solid blue;
+}
+
+.highlightQuestioned{
+    border: 3px solid #fd04db !important;
+}
+.highlightNumber {
+    border: 1px solid #ceb8b8;
+}
+.highlightSuspect {
+    border: 3px solid #b5fc06;
 }

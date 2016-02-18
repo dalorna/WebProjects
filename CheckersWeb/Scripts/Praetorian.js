@@ -97,8 +97,12 @@ function ShowPositions(id, index, img, color) {
     $(id).prepend('<img class="centerImage highlightNumber" alt=' + color + ' id="' + index + '" src="' + img + '" draggable="true" ondragstart="drag(event)" onclick="imgClick(this)" onmouseover="imgOver(this)" onmouseout="imgOut(this)" />');
 };
 
-function ShowPositionsPost(id, index, img, color) {
-    $('#' + id).prepend('<img class="centerImage highlightNumber" alt=' + color + ' id="' + index + '" src="' + img + '" draggable="true" ondragstart="drag(event)" onclick="imgClick(this)" onmouseover="imgOver(this)" onmouseout="imgOut(this)"/>');
+function ShowPositionsPost(id, index, img, color, questioned) {
+    var highlight = "highlightNumber";
+    if (questioned)
+        highlight = "highlightQuestioned";
+
+    $('#' + id).prepend('<img class="centerImage ' + highlight + '" alt=' + color + ' id="' + index + '" src="' + img + '" draggable="true" ondragstart="drag(event)" onclick="imgClick(this)" onmouseover="imgOver(this)" onmouseout="imgOut(this)"/>');
 };
 
 function allowDrop(ev) {
@@ -164,10 +168,10 @@ function ShowBoard(data, gameStart) {
 
         for (var i = 0; i < json.Pieces.length; i++) {
             if (json.Pieces[i].Piece == 100) {
-                ShowPositionsPost(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/PurpleTower.png", "PRAETORIAN");
+                ShowPositionsPost(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/PurpleTower.png", "PRAETORIAN", json.Pieces[i].HasBeenQuestioned);
             }
             else if (json.Pieces[i].Piece > 0 && json.Pieces[i].Piece < 100) {
-                ShowPositionsPost(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/Numbers/" + json.Pieces[i].Piece + ".png", json.Pieces[i].Piece);
+                ShowPositionsPost(json.Pieces[i].Position, json.Pieces[i].Index, "/Content/Assets/Numbers/" + json.Pieces[i].Piece + ".png", json.Pieces[i].Piece, json.Pieces[i].HasBeenQuestioned);
             }
         }
 
@@ -230,8 +234,12 @@ function ShowState(i) {
 
 function imgClick(img)
 {
+    if ($(img).hasClass() && $('#btnPraetorain')[0].checked)
+        return;
+
     $('img').removeClass('highlightSuspect');
-    $('img').addClass('highlightNumber');
+    $('img:not(.highlightQuestioned)').addClass('highlightNumber');
+    
     questionedPiece = null;
     var Id = parseInt(img.id);
     if(boardData != null)

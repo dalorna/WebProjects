@@ -9,22 +9,17 @@ namespace CheckersWeb.Classes
     public class PraetorianBoard
     {
         public int _score = 0;
-        //public CellState[] _boardArray;
         private List<PraetorianPieceViewModel> _boardPieces;
-
         public List<PraetorianPieceViewModel> BoardPieces
         {
             get { return _boardPieces; }
         }
-
         bool _mAssassinTurn;
-
         public bool GameOver
         {
             get;
             private set;
         }
-
         public int RecursiveScore
         {
             get;
@@ -76,8 +71,6 @@ namespace CheckersWeb.Classes
                 new List<int>() {2, 11, 20, 29, 38, 47, -100, -100 },
                 new List<int>() {4, 13, 22, 31, -100, -100, -100, -100 },
                 new List<int>() {6, 15, -100, -100, -100, -100, -100, -100 }
-
-
         };
 
         public PraetorianBoard(List<PraetorianPieceViewModel> boardPieces, bool AssassinTurn)
@@ -232,6 +225,75 @@ namespace CheckersWeb.Classes
             if (_mAssassinTurn && ((piece.Piece == CellState.PRAETORIAN || piece.Piece == CellState.EMPTY) == false))
             {
                 PossibleBoards = MoveNumberPiece(piece, i);
+                PossibleBoards.AddRange(GetTargets(piece, i));
+            }
+
+            return PossibleBoards;
+        }
+
+        public static Predicate<List<int>> findLine(int ifrom, int ito)
+        {
+            return delegate (List<int> x)
+            {
+                var bFrom = x.FindIndex(PraetorianBoard.ByInt(ifrom)) >= 0;
+                var bTo = x.FindIndex(PraetorianBoard.ByInt(ito)) >= 0;
+                return bFrom && bTo;
+            };
+        }
+
+        public List<PraetorianBoard> GetTargets(PraetorianPieceViewModel assassinPiece, int i)
+        {
+            List<PraetorianBoard> PossibleBoards = new List<PraetorianBoard>();
+            if (assassinPiece.IsAssassin == false)
+                return PossibleBoards;
+
+            var allLines = new List<List<int>>();
+            allLines.AddRange(gameLines);
+            allLines.AddRange(diagonalLines);
+
+            var targets = _boardPieces.Where(w => w.IsTarget);
+
+            foreach (var target in targets)
+            {
+                var linesToEvaluate = allLines.FindAll(findLine(assassinPiece.Index, target.Index));
+                if (linesToEvaluate.Count > 1)
+                {
+                    throw new Exception("lines to evaluate theortically should only be 1");
+                }
+
+                if(linesToEvaluate.Count == 1)
+                {
+                    var line = linesToEvaluate[0];
+                    var targetIndex = line.FindIndex(ByInt(target.Index));//line.FindIndex(ByInt(praetorianPiece.Index));
+                    var assassinIndex = line.FindIndex(ByInt(assassinPiece.Index));
+
+                    if ((targetIndex >= 0 && assassinIndex >= 0))
+                    {
+                        if (Math.Abs(targetIndex - assassinIndex) == 1)
+                        {
+                            var newBoard = _boardPieces.Clone().ToList();
+                            newBoard[target.Index].IsDead = true;
+                            newBoard[target.Index].HasBeenQuestioned = false;
+                            newBoard[target.Index].Index = target.Index;
+                            //newBoard[target.Index].Position = _boardPieces.ToList()[target.Index].Position;
+                            newBoard[target.Index].IsAssassin = false;
+                            newBoard[target.Index].IsDead = false;
+                            newBoard[target.Index].IsTarget = false;
+                            newBoard[target.Index].Piece = CellState.EMPTY;
+                            newBoard[target.Index].IsCaught = false;
+                            newBoard[target.Index].MovesMade = new List<int>();
+
+                            if (newBoard.Where(w => w.IsTarget).Count() == 0)
+                            {
+                                GameOver = true;
+                            }
+
+                            newBoard = newBoard.OrderBy(o => o.Index).ToList();
+                            PossibleBoards.Add(new PraetorianBoard(newBoard, !_mAssassinTurn));
+                            break;
+                        }
+                    }
+                }           
             }
 
             return PossibleBoards;
@@ -293,8 +355,56 @@ namespace CheckersWeb.Classes
                             }
                         }
                     }
+
+                    PossibleBoards.AddRange(GetSuspects(_boardPieces[i], i));
                 }
             }
+            return PossibleBoards;
+        }
+
+        public List<PraetorianBoard> GetSuspects(PraetorianPieceViewModel praetorianPiece, int i)
+        {
+            List<PraetorianBoard> PossibleBoards = new List<PraetorianBoard>();
+            var allLines = new List<List<int>>();
+            allLines.AddRange(gameLines);
+            allLines.AddRange(diagonalLines);
+            
+            foreach (var prox in _boardPieces)
+            {
+                if (prox.Piece == CellState.EMPTY || prox.Piece == CellState.PRAETORIAN)
+                    continue;
+
+                var linesToEvaluate = allLines.FindAll(findLine(praetorianPiece.Index, prox.Index));
+                if(linesToEvaluate. Count > 1)
+                {
+                    throw new Exception("lines to evaluate theortically should only be 1");
+                }
+
+                if (linesToEvaluate.Count == 1)
+                {
+                    var line = linesToEvaluate[0];
+                    var firstCop = line.FindIndex(ByInt(praetorianPiece.Index));
+                    var suspect = line.FindIndex(ByInt(prox.Index));
+                    if ((firstCop >= 0 && suspect >= 0))
+                    {
+                        if (firstCop >= 0 && Math.Abs(firstCop - suspect) == 1 && _boardPieces[prox.Index].HasBeenQuestioned == false)
+                        {
+                            var newBoard = _boardPieces.Clone().ToList();
+                            newBoard[prox.Index].HasBeenQuestioned = true;
+                            if (newBoard[prox.Index].IsAssassin)
+                            {
+                                newBoard[prox.Index].IsCaught = true;
+                                GameOver = true;
+                            }
+
+                            newBoard = newBoard.OrderBy(o => o.Index).ToList();
+                            PossibleBoards.Add(new PraetorianBoard(newBoard, !_mAssassinTurn));
+                            break;
+                        }
+                    }
+                }              
+            }
+
             return PossibleBoards;
         }
 
@@ -325,6 +435,7 @@ namespace CheckersWeb.Classes
                     PossibleBoards.AddRange(MoveForAssassin(_boardPieces[i], i));
 
                     PossibleBoards.AddRange(MoveForPraetorian(_boardPieces[i], i));
+
                 }
             }
 
