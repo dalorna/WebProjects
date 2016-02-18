@@ -26,6 +26,7 @@ namespace CheckersWeb.Classes
             get;
             private set;
         }
+        public bool JustKilled { get; set; }
 
         public PraetorianBoard(List<PraetorianPieceViewModel> boardPieces, bool AssassinTurn)
         {
@@ -107,11 +108,26 @@ namespace CheckersWeb.Classes
                 else if (targets.Count == 1) iboardScore += 1000;
                 else { iboardScore += 1000000; GameOver = true; }
 
-                targets.ForEach(e => iboardScore += Distance.DistanceScore(longestDistance, Distance.Euclidean(aPoint, new Point(e.Index / 8, e.Index % 8))));
+                targets.ForEach(e => iboardScore += Distance.DistanceScoreForTargets(longestDistance, Distance.Euclidean(aPoint, new Point(e.Index / 8, e.Index % 8))));
+                cops.ForEach(e => iboardScore += Distance.DistanceScoreForCops(longestDistance, Distance.Euclidean(aPoint, new Point(e.Index / 8, e.Index % 8))));
 
-                //Calculate Praetorian Position to Assassin
+                var highMovers = _boardPieces.Where(w => w.MovesMade.Count > assassin.MovesMade.Count).ToList();
+                var lowMovers = _boardPieces.Where(w => w.MovesMade.Count < assassin.MovesMade.Count).ToList();
+
                 //Calculate how many times a piece has moved and could be considered a possible assassin
+                if (highMovers.Count == 0) iboardScore -= 1000;
+
+                if (highMovers.Count >= 5) iboardScore += 500;
+                else if (highMovers.Count >= 3) iboardScore += 100;
+
+                if (highMovers.Count > lowMovers.Count) iboardScore += 500;
+
+
                 //Calculate can kill to hide identity
+                //if(this.JustKilled) and no pieces around me, negative score
+                //the more pieces around me Math.Power(score, power of number of pieces around me)
+
+                //Calculate piece on aline between the assassin this should have a high score
 
                 return iboardScore;
             }
@@ -119,7 +135,9 @@ namespace CheckersWeb.Classes
             //Calculate Praetorian to question new citizen
             //Calculate # of Citizens Questioned
             //Calculate targets down
-            //Calculate how many times a piece has moved and unquestioned for possible assassin...
+            //Calculate how many times a piece has moved and unquestioned for possible assassin
+            //Calculate how many times a piece has moved and could be considered a possible assassin
+           
 
             return -(iboardScore);
         }
@@ -304,7 +322,9 @@ namespace CheckersWeb.Classes
                             }
 
                             newBoard = newBoard.OrderBy(o => o.Index).ToList();
-                            PossibleBoards.Add(new PraetorianBoard(newBoard, !_mAssassinTurn));
+                            var killBoard = new PraetorianBoard(newBoard, !_mAssassinTurn);
+                            killBoard.JustKilled = true;
+                            PossibleBoards.Add(killBoard);
                             break;
                         }
                     }
@@ -515,11 +535,19 @@ namespace CheckersWeb.Classes
             return 1 / (1 + Euclidean(p1, p2));
         }
 
-        public static int DistanceScore(double topScore, double distance)
+        public static int DistanceScoreForTargets(double topScore, double distance)
         {
             int startScore = 100;
 
             startScore = startScore * ((int)(topScore/distance));
+            return startScore;
+        }
+
+        public static int DistanceScoreForCops(double topScore, double distance)
+        {
+            int startScore = 100;
+
+            startScore = startScore * ((int)(distance / topScore));
             return startScore;
         }
     }
