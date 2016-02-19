@@ -38,10 +38,12 @@ namespace CheckersWeb.Controllers
                 _Board.IsAssassinComputer = false;
                 _Board.IsLegalMove = true;
                 _Board.GameState = PraetorianGameState.ASSASSINTURN;
+                PraetorianBoard.ComputerState = PraetorianGameState.PRAETORIANTURN;
             }
             else
             {
                 _Board.IsAssassinComputer = true;
+                PraetorianBoard.ComputerState = PraetorianGameState.ASSASSINTURN;
                 PraetorianGameSetup pGame = new PraetorianGameSetup(_Board.Pieces.ToList());
                 var newBoard = pGame.ComputerMakeMove(GAMEDEPTH, true);
                 _Board.Pieces = newBoard.BoardPieces;
@@ -100,7 +102,7 @@ namespace CheckersWeb.Controllers
                             if (posPiece != null && posPiece.Piece == CellState.EMPTY)
                             {
                                 var piecesBefore = _Board.Pieces.ToList().Clone();
-                                PraetorianBoard.SwapPosition(_Board.Pieces.ToList(), iPossible, piece.Index);
+                                SwapPosition(_Board.Pieces.ToList(), iPossible, piece.Index);
                                 _Board.Pieces = _Board.Pieces.OrderBy(o => o.Index);
                                 _Board.GameState = PraetorianGameState.PRAETORIANTURN;
                                 bIsLegal = true;
@@ -138,7 +140,7 @@ namespace CheckersWeb.Controllers
                             if (posPiece != null && posPiece.Piece == CellState.EMPTY)
                             {
                                 var piecesBefore = _Board.Pieces.ToList().Clone();
-                                PraetorianBoard.SwapPosition(_Board.Pieces.ToList(), iPossible, piece.Index);
+                                SwapPosition(_Board.Pieces.ToList(), iPossible, piece.Index);
                                 _Board.Pieces = _Board.Pieces.OrderBy(o => o.Index);
                                 _Board.GameState = PraetorianGameState.ASSASSINTURN;
                                 bIsLegal = true;
@@ -204,7 +206,7 @@ namespace CheckersWeb.Controllers
                     if(bIsLegal)
                     {
                         var newBoard = _Board.Pieces.ToList().Clone().ToList();
-                        PraetorianBoard.SwapPosition(_Board.Pieces.ToList(), int.Parse(toPosition), int.Parse(fromPosition));
+                        SwapPosition(_Board.Pieces.ToList(), int.Parse(toPosition), int.Parse(fromPosition));
                         _Board.Pieces = _Board.Pieces.OrderBy(o => o.Index);
                         _Board.GameState = PraetorianGameState.ASSASSINTURN;
                     }
@@ -310,6 +312,21 @@ namespace CheckersWeb.Controllers
             {
                 return find.Equals(piece);
             };
+        }
+
+        public void SwapPosition(List<PraetorianPieceViewModel> model, int ito, int ifrom)
+        {
+            var to = model[ito];
+            var from = model[ifrom];
+            var tempPos = from.Position;
+            var tempIndex = from.Index;
+            from.Index = to.Index;
+            from.Position = to.Position;
+            to.Position = tempPos;
+            to.Index = tempIndex;
+            model[ito] = from;
+            model[ifrom] = to;
+            model[ito].MovesMade.Add(ito);
         }
     }
 }

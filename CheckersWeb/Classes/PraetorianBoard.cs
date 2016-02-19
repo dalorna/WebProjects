@@ -11,6 +11,7 @@ namespace CheckersWeb.Classes
     {
         public int _score = 0;
         private List<PraetorianPieceViewModel> _boardPieces;
+
         public List<PraetorianPieceViewModel> BoardPieces
         {
             get { return _boardPieces; }
@@ -26,7 +27,18 @@ namespace CheckersWeb.Classes
             get;
             private set;
         }
+
         public bool JustKilled { get; set; }
+
+        public bool JustKilledByPlayerAssassin { get; set; }
+
+        public static List<PraetorianPieceViewModel> KnownAssassinIndex = new List<PraetorianPieceViewModel>();
+
+        public static PraetorianPieceViewModel DeadTarget;
+
+        public static PraetorianGameState ComputerState;
+
+        public int MoveTo{ get; set; }
 
         public PraetorianBoard(List<PraetorianPieceViewModel> boardPieces, bool AssassinTurn)
         {
@@ -100,19 +112,33 @@ namespace CheckersWeb.Classes
             var aPoint = new Point(assassin.Index / 8, assassin.Index % 8);
             var targets = boardPieces.Where(w => w.IsTarget).ToList();
             var cops = boardPieces.Where(w => w.Piece == CellState.PRAETORIAN).ToList();
+            var allCitizens = boardPieces.Where(w => w.Piece != CellState.PRAETORIAN || w.Piece != CellState.EMPTY);
+            var questionedCitizens = boardPieces.Where(w => (w.Piece != CellState.PRAETORIAN || w.Piece != CellState.EMPTY) && w.HasBeenQuestioned);
+            var UnQuestCitizens = boardPieces.Where(w => (w.Piece != CellState.PRAETORIAN || w.Piece != CellState.EMPTY) && w.HasBeenQuestioned == false);
 
-          
-            if (_mAssassinTurn)
+            var allLines = new List<List<int>>();
+            allLines.AddRange(gameLines);
+            allLines.AddRange(diagonalLines);
+            List<int> possibleMoves = new List<int>() { -9, -8, -7, -1, 1, 7, 8, 9 };
+
+            if (ComputerState == PraetorianGameState.ASSASSINTURN)
             {
-                if (targets.Count == 2) iboardScore += 100;
-                else if (targets.Count == 1) iboardScore += 1000;
+                if (targets.Count == 2) iboardScore += 1000;
+                else if (targets.Count == 1) iboardScore += 100;
                 else { iboardScore += 1000000; GameOver = true; }
 
-                targets.ForEach(e => iboardScore += Distance.DistanceScoreForTargets(longestDistance, Distance.Euclidean(aPoint, new Point(e.Index / 8, e.Index % 8))));
-                cops.ForEach(e => iboardScore += Distance.DistanceScoreForCops(longestDistance, Distance.Euclidean(aPoint, new Point(e.Index / 8, e.Index % 8))));
+                foreach(var targ in targets)
+                {
+                    iboardScore += Distance.DistanceScoreForTargets(longestDistance, Distance.Euclidean(aPoint, new Point(targ.Index / 8, targ.Index % 8)));
+                }
+                foreach(var cop in cops)
+                {
 
-                var highMovers = _boardPieces.Where(w => w.MovesMade.Count > assassin.MovesMade.Count).ToList();
-                var lowMovers = _boardPieces.Where(w => w.MovesMade.Count < assassin.MovesMade.Count).ToList();
+                    iboardScore += Distance.DistanceScoreForCops(longestDistance, Distance.Euclidean(aPoint, new Point(cop.Index / 8, cop.Index % 8)));
+                }
+
+                var highMovers = boardPieces.Where(w => w.MovesMade != null && w.MovesMade.Count > assassin.MovesMade.Count).ToList();
+                var lowMovers = boardPieces.Where(w => w.MovesMade != null && w.MovesMade.Count < assassin.MovesMade.Count).ToList();
 
                 //Calculate how many times a piece has moved and could be considered a possible assassin
                 if (highMovers.Count == 0) iboardScore -= 1000;
@@ -126,18 +152,88 @@ namespace CheckersWeb.Classes
                 //Calculate can kill to hide identity
                 //if(this.JustKilled) and no pieces around me, negative score
                 //the more pieces around me Math.Power(score, power of number of pieces around me)
+                if (JustKilled)
+                {
+                    var adjacentSquares = possibleMoves.Select(i => assassin.Index + i).ToList();
+                    int iAdjacentTotal = 0;
+                    foreach (int iadj in adjacentSquares)
+                    {
+                        if (allLines.FindAll(findLine(assassin.Index, iadj)).Count == 1
+                            && (boardPieces[iadj].Piece != CellState.EMPTY || boardPieces[iadj].Piece != CellState.PRAETORIAN))
+                            iAdjacentTotal += 1;
+                    }
+                    iboardScore += (int)(Math.Pow(10.0, iAdjacentTotal));
+                }
 
-                //Calculate piece on aline between the assassin this should have a high score
+                //Calculate piece on a line between the assassin and the cop this should have a high score
+                int iPieceBetween0 = 0;
+                int iPieceBetween1 = 1;
+                var lineAP0 = allLines.FindAll(findLine(assassin.Index, cops[0].Index));
+                var lineAP1 = allLines.FindAll(findLine(assassin.Index, cops[0].Index));
 
-                return iboardScore;
+                if (lineAP0.Count == 1)
+                {
+                    for (int i = (assassin.Index > cops[0].Index ? cops[0].Index : assassin.Index) + 1; i < (assassin.Index > cops[0].Index ? assassin.Index : cops[0].Index); i++)
+                    {
+                        if (boardPieces[i].Piece != CellState.EMPTY || boardPieces[i].Piece != CellState.PRAETORIAN)
+                            iPieceBetween0++;
+                    }
+                }
+                if (lineAP1.Count == 1)
+                {
+                    for (int i = (assassin.Index > cops[1].Index ? cops[1].Index : assassin.Index) + 1; i < (assassin.Index > cops[1].Index ? assassin.Index : cops[1].Index); i++)
+                    {
+                        if (boardPieces[i].Piece != CellState.EMPTY || boardPieces[i].Piece != CellState.PRAETORIAN)
+                            iPieceBetween1++;
+                    }
+                }
+
+                iboardScore += (iPieceBetween0 + iPieceBetween1) * 100;
             }
 
-            //Calculate Praetorian to question new citizen
             //Calculate # of Citizens Questioned
+            iboardScore += questionedCitizens.Count() * 10000;
+
+            //Calculate Praetorian to question new citizen
+            foreach(var Unquested in UnQuestCitizens)
+            {
+                double iDistance0 = Distance.Euclidean(new Point(cops[0].Index / 8, cops[0].Index % 8), new Point(Unquested.Index / 8, Unquested.Index % 8));
+                double iDistance1 = Distance.Euclidean(new Point(cops[1].Index / 8, cops[1].Index % 8), new Point(Unquested.Index / 8, Unquested.Index % 8));
+
+                iboardScore += 100 / ((int)(iDistance0 + iDistance1));
+            }
+
             //Calculate targets down
+            iboardScore += targets.Count() * 5000;
+
             //Calculate how many times a piece has moved and unquestioned for possible assassin
-            //Calculate how many times a piece has moved and could be considered a possible assassin
-           
+            var hMovers = allCitizens.Where(w => w.MovesMade != null && w.MovesMade.Count > 0 && w.HasBeenQuestioned == false).OrderByDescending(o => o.MovesMade.Count).Take(5).ToList();
+            iboardScore += 10000 / (10 + hMovers.Count);
+
+            if(JustKilledByPlayerAssassin)
+            {
+                foreach(var ped in boardPieces)
+                {
+                    var adjDead = possibleMoves.Select(i => DeadTarget.Index + i).ToList();
+                    var deadLine = allLines.FindAll(findLine(DeadTarget.Index, ped.Index));
+                    if(deadLine.Count == 1)
+                    {
+                        if (ped.HasBeenQuestioned == false)
+                            KnownAssassinIndex.Add(ped);
+                    }
+                }
+            }
+
+            foreach (var known in KnownAssassinIndex)
+            {
+                double iDistance0 = Distance.Euclidean(new Point(cops[0].Index / 8, cops[0].Index % 8), new Point(known.Index / 8, known.Index % 8));
+                double iDistance1 = Distance.Euclidean(new Point(cops[1].Index / 8, cops[1].Index % 8), new Point(known.Index / 8, known.Index % 8));
+
+                iboardScore += (10000 / ((int)(iDistance0 + iDistance1)) - 10000);
+            }
+
+            if (_mAssassinTurn)
+                return iboardScore;
 
             return -(iboardScore);
         }
@@ -202,7 +298,7 @@ namespace CheckersWeb.Classes
             return capturedAssassin || deadTargets;
         }
 
-        public static void SwapPosition(List<PraetorianPieceViewModel> model, int ito, int ifrom)
+        public void SwapPosition(List<PraetorianPieceViewModel> model, int ito, int ifrom)
         {
             var to = model[ito];
             var from = model[ifrom];
@@ -214,8 +310,7 @@ namespace CheckersWeb.Classes
             to.Index = tempIndex;
             model[ito] = from;
             model[ifrom] = to;
-
-            model[ito].MovesMade.Add(ito);
+            MoveTo = ito;
         }
 
         private List<PraetorianBoard> MoveNumberPiece(PraetorianPieceViewModel piece, int i)
@@ -491,10 +586,29 @@ namespace CheckersWeb.Classes
         public PraetorianBoard Current { get; private set; }
         PraetorianBoard init;
 
+        private static PraetorianBoard BeforeUpdate { get; set; }
+
         public PraetorianGameSetup(List<PraetorianPieceViewModel> boardPieces)
         {
             List<PraetorianPieceViewModel> boardPiecesvalues = boardPieces;
             init = new PraetorianBoard(boardPiecesvalues, true);
+
+            if (boardPieces.Where(w => w.IsTarget).Count() == 1 && BeforeUpdate.BoardPieces.Where(w => w.IsTarget).Count() == 2)
+            {
+                var unknownTargets = BeforeUpdate.BoardPieces.Where(w => w.IsTarget).ToList();
+                var deadTarget = unknownTargets.First(w => w.Index != boardPieces.First(f => f.IsTarget).Index);
+                PraetorianBoard.DeadTarget = deadTarget;
+            }
+
+            var questioned = init.BoardPieces.Where(w => w.HasBeenQuestioned).ToList();
+            for(int i = questioned.Count; i > 0 && PraetorianBoard.KnownAssassinIndex.Count > 0; i--)
+            {
+                PraetorianBoard.KnownAssassinIndex.Remove(questioned[i]);
+            }
+
+            bool bKill = boardPieces.Where(w => w.IsTarget).Count() == 1 && Current.BoardPieces.Where(w => w.IsTarget).Count() == 2;
+            init.JustKilledByPlayerAssassin = bKill;
+            BeforeUpdate = init;
             Current = init;
         }
 
@@ -523,7 +637,8 @@ namespace CheckersWeb.Classes
         /// </summary>
         public static double Euclidean(Point p1, Point p2)
         {
-            return Math.Sqrt(Math.Pow(p1.X - p2.X, 2) + Math.Pow(p1.Y - p2.Y, 2));
+            //return Math.Sqrt(Math.Pow(p1.X - p2.X, 2) + Math.Pow(p1.Y - p2.Y, 2));
+            return Math.Pow(p1.X - p2.X, 2) + Math.Pow(p1.Y - p2.Y, 2);
         }
 
         /// <summary>
