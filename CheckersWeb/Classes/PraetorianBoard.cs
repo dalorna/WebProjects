@@ -30,7 +30,7 @@ namespace CheckersWeb.Classes
 
         public bool JustKilled { get; set; }
 
-        public bool JustKilledByPlayerAssassin { get; set; }
+        public static bool JustKilledByPlayerAssassin { get; set; }
 
         public static List<PraetorianPieceViewModel> KnownAssassinIndex = new List<PraetorianPieceViewModel>();
 
@@ -197,26 +197,25 @@ namespace CheckersWeb.Classes
             //Calculate Praetorian to question new citizen
             foreach(var Unquested in UnQuestCitizens)
             {
-                double iDistance0 = Distance.Euclidean(new Point(cops[0].Index / 8, cops[0].Index % 8), new Point(Unquested.Index / 8, Unquested.Index % 8));
-                double iDistance1 = Distance.Euclidean(new Point(cops[1].Index / 8, cops[1].Index % 8), new Point(Unquested.Index / 8, Unquested.Index % 8));
+                int iDistance0 = (int)Distance.Euclidean(new Point(cops[0].Index / 8, cops[0].Index % 8), new Point(Unquested.Index / 8, Unquested.Index % 8));
+                int iDistance1 = (int)Distance.Euclidean(new Point(cops[1].Index / 8, cops[1].Index % 8), new Point(Unquested.Index / 8, Unquested.Index % 8));
 
-                iboardScore += 100 / ((int)(iDistance0 + iDistance1));
+                iboardScore += -(iDistance0 + iDistance1);
             }
 
-            //Calculate targets down
-            iboardScore += targets.Count() * 5000;
-
             //Calculate how many times a piece has moved and unquestioned for possible assassin
-            var hMovers = allCitizens.Where(w => w.MovesMade != null && w.MovesMade.Count > 0 && w.HasBeenQuestioned == false).OrderByDescending(o => o.MovesMade.Count).Take(5).ToList();
-            iboardScore += 10000 / (10 + hMovers.Count);
+            var hMovers = allCitizens.Where(w => w.MovesMade != null && w.MovesMade.Count > 0 && w.HasBeenQuestioned == false).OrderByDescending(o => o.MovesMade.Count).ToList();
+            iboardScore += -(100 * hMovers.Count);
 
             if(JustKilledByPlayerAssassin)
             {
+                var adjDead = possibleMoves.Select(i => DeadTarget.Index + i).ToList();
                 foreach(var ped in boardPieces)
                 {
-                    var adjDead = possibleMoves.Select(i => DeadTarget.Index + i).ToList();
                     var deadLine = allLines.FindAll(findLine(DeadTarget.Index, ped.Index));
-                    if(deadLine.Count == 1)
+
+
+                    if(deadLine.Count == 1 && (Math.Abs(deadLine[0].FindIndex(ByInt(DeadTarget.Index)) - deadLine[0].FindIndex(ByInt(ped.Index))) == 1) && ped.Piece != CellState.EMPTY)
                     {
                         if (ped.HasBeenQuestioned == false)
                             KnownAssassinIndex.Add(ped);
@@ -226,14 +225,25 @@ namespace CheckersWeb.Classes
 
             foreach (var known in KnownAssassinIndex)
             {
-                double iDistance0 = Distance.Euclidean(new Point(cops[0].Index / 8, cops[0].Index % 8), new Point(known.Index / 8, known.Index % 8));
-                double iDistance1 = Distance.Euclidean(new Point(cops[1].Index / 8, cops[1].Index % 8), new Point(known.Index / 8, known.Index % 8));
+                int iDistance0 = (int)Distance.Euclidean(new Point(cops[0].Index / 8, cops[0].Index % 8), new Point(known.Index / 8, known.Index % 8));
+                int iDistance1 = (int)Distance.Euclidean(new Point(cops[1].Index / 8, cops[1].Index % 8), new Point(known.Index / 8, known.Index % 8));
 
-                iboardScore += (10000 / ((int)(iDistance0 + iDistance1)) - 10000);
+                iboardScore += -(2 * (iDistance0 + iDistance1));//(10000 / ((int)(iDistance0 + iDistance1)) - 10000);
             }
 
             if (_mAssassinTurn)
+            {
+                if(iboardScore < 0)
+                {
+                    throw new Exception("Scoring needs adjusting, turn should always be positive");
+                }
                 return iboardScore;
+            }
+
+            if (-iboardScore > 0)
+            {
+                throw new Exception("Scoring needs adjusting, turn should always be negative");
+            }
 
             return -(iboardScore);
         }
@@ -606,8 +616,8 @@ namespace CheckersWeb.Classes
                 PraetorianBoard.KnownAssassinIndex.Remove(questioned[i]);
             }
 
-            bool bKill = boardPieces.Where(w => w.IsTarget).Count() == 1 && Current.BoardPieces.Where(w => w.IsTarget).Count() == 2;
-            init.JustKilledByPlayerAssassin = bKill;
+            bool bKill = boardPieces.Where(w => w.IsTarget).Count() == 1 && BeforeUpdate.BoardPieces.Where(w => w.IsTarget).Count() == 2;
+            PraetorianBoard.JustKilledByPlayerAssassin = bKill;
             BeforeUpdate = init;
             Current = init;
         }
@@ -617,6 +627,8 @@ namespace CheckersWeb.Classes
             PraetorianBoard next = Current.FindNextMove(depth, IsAssassinTurn);
             if (next != null)
                 Current = next;
+
+            PraetorianBoard.JustKilledByPlayerAssassin = false;
 
             return Current;
         }
