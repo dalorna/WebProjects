@@ -105,7 +105,7 @@ namespace CheckersWeb.Classes
 
         private int GetOverallScore(List<PraetorianPieceViewModel> boardPieces)
         {
-            int iboardScore = 10000;//Start with 1k to attempt to avoid positive and negative numbers getting reversed Alpha should be a postive number and beta should be negative
+            int iboardScore = 100000;//Start with 10k to attempt to avoid positive and negative numbers getting reversed Alpha should be a postive number and beta should be negative
             double longestDistance = Distance.Euclidean(new Point(0, 0), new Point(7, 7));
 
             var assassin = boardPieces.First(f => f.IsAssassin);
@@ -123,6 +123,7 @@ namespace CheckersWeb.Classes
 
             if (ComputerState == PraetorianGameState.ASSASSINTURN)
             {
+                #region Assassin Logic
                 if (targets.Count == 2) iboardScore += 1000;
                 else if (targets.Count == 1) iboardScore += 100;
                 else { iboardScore += 1000000; GameOver = true; }
@@ -189,10 +190,11 @@ namespace CheckersWeb.Classes
                 }
 
                 iboardScore += (iPieceBetween0 + iPieceBetween1) * 100;
+                #endregion
             }
 
             //Calculate # of Citizens Questioned
-            iboardScore += questionedCitizens.Count() * 10000;
+            iboardScore += questionedCitizens.Count() * 1000;
 
             //Calculate Praetorian to question new citizen
             foreach(var Unquested in UnQuestCitizens)
@@ -207,29 +209,15 @@ namespace CheckersWeb.Classes
             var hMovers = allCitizens.Where(w => w.MovesMade != null && w.MovesMade.Count > 0 && w.HasBeenQuestioned == false).OrderByDescending(o => o.MovesMade.Count).ToList();
             iboardScore += -(100 * hMovers.Count);
 
-            if(JustKilledByPlayerAssassin)
-            {
-                var adjDead = possibleMoves.Select(i => DeadTarget.Index + i).ToList();
-                foreach(var ped in boardPieces)
-                {
-                    var deadLine = allLines.FindAll(findLine(DeadTarget.Index, ped.Index));
-
-
-                    if(deadLine.Count == 1 && (Math.Abs(deadLine[0].FindIndex(ByInt(DeadTarget.Index)) - deadLine[0].FindIndex(ByInt(ped.Index))) == 1) && ped.Piece != CellState.EMPTY)
-                    {
-                        if (ped.HasBeenQuestioned == false)
-                            KnownAssassinIndex.Add(ped);
-                    }
-                }
-            }
-
             foreach (var known in KnownAssassinIndex)
             {
                 int iDistance0 = (int)Distance.Euclidean(new Point(cops[0].Index / 8, cops[0].Index % 8), new Point(known.Index / 8, known.Index % 8));
                 int iDistance1 = (int)Distance.Euclidean(new Point(cops[1].Index / 8, cops[1].Index % 8), new Point(known.Index / 8, known.Index % 8));
 
-                iboardScore += -(2 * (iDistance0 + iDistance1));//(10000 / ((int)(iDistance0 + iDistance1)) - 10000);
+                iboardScore += -(7 * (iDistance0 + iDistance1));//(10000 / ((int)(iDistance0 + iDistance1)) - 10000);
             }
+
+            //Calculate moves to get to an known assassin index...
 
             if (_mAssassinTurn)
             {
@@ -603,21 +591,38 @@ namespace CheckersWeb.Classes
             List<PraetorianPieceViewModel> boardPiecesvalues = boardPieces;
             init = new PraetorianBoard(boardPiecesvalues, true);
 
-            if (boardPieces.Where(w => w.IsTarget).Count() == 1 && BeforeUpdate.BoardPieces.Where(w => w.IsTarget).Count() == 2)
-            {
-                var unknownTargets = BeforeUpdate.BoardPieces.Where(w => w.IsTarget).ToList();
-                var deadTarget = unknownTargets.First(w => w.Index != boardPieces.First(f => f.IsTarget).Index);
-                PraetorianBoard.DeadTarget = deadTarget;
-            }
-
             var questioned = init.BoardPieces.Where(w => w.HasBeenQuestioned).ToList();
-            for(int i = questioned.Count; i > 0 && PraetorianBoard.KnownAssassinIndex.Count > 0; i--)
+            for(int i = questioned.Count - 1; i > 0 && PraetorianBoard.KnownAssassinIndex.Count > 0; i--)
             {
                 PraetorianBoard.KnownAssassinIndex.Remove(questioned[i]);
             }
 
-            bool bKill = boardPieces.Where(w => w.IsTarget).Count() == 1 && BeforeUpdate.BoardPieces.Where(w => w.IsTarget).Count() == 2;
-            PraetorianBoard.JustKilledByPlayerAssassin = bKill;
+            if (boardPieces.Where(w => w.IsTarget).Count() == 1 && BeforeUpdate.BoardPieces.Where(w => w.IsTarget).Count() == 2)
+            {
+                List<int> possibleMoves = new List<int>() { -9, -8, -7, -1, 1, 7, 8, 9 };
+                var allLines = new List<List<int>>();
+                allLines.AddRange(PraetorianBoard.gameLines);
+                allLines.AddRange(PraetorianBoard.diagonalLines);
+                var unknownTargets = BeforeUpdate.BoardPieces.Where(w => w.IsTarget).ToList();
+                var deadTarget = unknownTargets.First(w => w.Index != boardPieces.First(f => f.IsTarget).Index);
+
+                var adjDead = possibleMoves.Select(i => deadTarget.Index + i).ToList();
+                foreach (var ped in boardPieces)
+                {
+                    var deadLine = allLines.FindAll(PraetorianBoard.findLine(deadTarget.Index, ped.Index));
+
+
+                    if (deadLine.Count == 1 && (Math.Abs(deadLine[0].FindIndex(PraetorianBoard.ByInt(deadTarget.Index)) - deadLine[0].FindIndex(PraetorianBoard.ByInt(ped.Index))) == 1) && ped.Piece != CellState.EMPTY)
+                    {
+                        if (ped.HasBeenQuestioned == false)
+                        {
+                            PraetorianBoard.KnownAssassinIndex.Add(ped);
+                        }
+                    }
+                }
+            }
+
+
             BeforeUpdate = init;
             Current = init;
         }
