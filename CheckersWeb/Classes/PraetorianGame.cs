@@ -30,7 +30,7 @@ namespace CheckersWeb.Classes
 
                 if ((iRow == 0 && iColumn == 0) || (iRow == 7 && iColumn == 7))
                 {
-                    Pieces.Add(new PraetorianPieceViewModel { Piece = CellState.PRAETORIAN, Position = "sq_" + i, Index = i, MovesMade = new List<int>() { i } });
+                    Pieces.Add(new PraetorianPieceViewModel { Piece = CellState.PRAETORIAN, Position = "sq_" + i, Index = i, MovesMade = new List<KeyValuePair<int, int>>() { new KeyValuePair<int, int>(0, i) } });
                 }
                 //else if (ranArray[i] != 0)
                 //{
@@ -89,7 +89,7 @@ namespace CheckersWeb.Classes
                 {
                     iPedIndex = ranList[t];
                     ranList.RemoveAt(t);
-                    pieces[iIndex] = new PraetorianPieceViewModel() { Piece = (CellState)Enum.Parse(typeof(CellState), iPedIndex.ToString()), Position = "sq_" + iIndex, Index = iIndex, MovesMade = new List<int>() { iIndex } };
+                    pieces[iIndex] = new PraetorianPieceViewModel() { Piece = (CellState)Enum.Parse(typeof(CellState), iPedIndex.ToString()), Position = "sq_" + iIndex, Index = iIndex, MovesMade = new List<KeyValuePair<int, int>>() { new KeyValuePair<int, int>(0, iIndex) } };
                     break;
                 }
             }

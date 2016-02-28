@@ -10,18 +10,22 @@ namespace CheckersWeb.Classes
     public class PraetorianBoard
     {
         public int _score = 0;
+
         private List<PraetorianPieceViewModel> _boardPieces;
 
         public List<PraetorianPieceViewModel> BoardPieces
         {
             get { return _boardPieces; }
         }
+
         bool _mAssassinTurn;
+
         public bool GameOver
         {
             get;
             private set;
         }
+
         public int RecursiveScore
         {
             get;
@@ -38,12 +42,19 @@ namespace CheckersWeb.Classes
 
         public static PraetorianGameState ComputerState;
 
+        public KeyValuePair<int, PraetorianPieceViewModel> LastMove {  get; set; }
+
+        //public static KeyValuePair<int, PraetorianPieceViewModel> LastMoveInit { get; set; }
+
+        public int MoveNumber { get; set; }
+        
         public int MoveTo{ get; set; }
 
-        public PraetorianBoard(List<PraetorianPieceViewModel> boardPieces, bool AssassinTurn)
+        public PraetorianBoard(List<PraetorianPieceViewModel> boardPieces, bool AssassinTurn, KeyValuePair<int, PraetorianPieceViewModel> lmove)
         {
             _mAssassinTurn = AssassinTurn;
             _boardPieces = boardPieces;
+            LastMove = lmove;
             ComputerScore();
         }
 
@@ -296,7 +307,7 @@ namespace CheckersWeb.Classes
             return capturedAssassin || deadTargets;
         }
 
-        public void SwapPosition(List<PraetorianPieceViewModel> model, int ito, int ifrom)
+        public void SwapPosition(List<PraetorianPieceViewModel> model, int ito, int ifrom, int iMoveNumber)
         {
             var to = model[ito];
             var from = model[ifrom];
@@ -309,6 +320,7 @@ namespace CheckersWeb.Classes
             model[ito] = from;
             model[ifrom] = to;
             MoveTo = ito;
+            LastMove = new KeyValuePair<int, PraetorianPieceViewModel>(iMoveNumber, model[ito]);
         }
 
         private List<PraetorianBoard> MoveNumberPiece(PraetorianPieceViewModel piece, int i)
@@ -336,9 +348,9 @@ namespace CheckersWeb.Classes
 
                 var newBoard = _boardPieces.Clone().ToList();
 
-                SwapPosition(newBoard, iPosMove, i);
+                SwapPosition(newBoard, iPosMove, i, MoveNumber);
                 newBoard = newBoard.OrderBy(o => o.Index).ToList();
-                PossibleBoards.Add(new PraetorianBoard(newBoard, !_mAssassinTurn));
+                PossibleBoards.Add(new PraetorianBoard(newBoard, !_mAssassinTurn, LastMove));
             }
 
             return PossibleBoards;
@@ -407,7 +419,7 @@ namespace CheckersWeb.Classes
                             newBoard[target.Index].IsTarget = false;
                             newBoard[target.Index].Piece = CellState.EMPTY;
                             newBoard[target.Index].IsCaught = false;
-                            newBoard[target.Index].MovesMade = new List<int>();
+                            newBoard[target.Index].MovesMade = new List<KeyValuePair<int, int>>();
 
                             if (newBoard.Where(w => w.IsTarget).Count() == 0)
                             {
@@ -415,7 +427,7 @@ namespace CheckersWeb.Classes
                             }
 
                             newBoard = newBoard.OrderBy(o => o.Index).ToList();
-                            var killBoard = new PraetorianBoard(newBoard, !_mAssassinTurn);
+                            var killBoard = new PraetorianBoard(newBoard, !_mAssassinTurn, LastMove);
                             killBoard.JustKilled = true;
                             PossibleBoards.Add(killBoard);
                             break;
@@ -452,9 +464,9 @@ namespace CheckersWeb.Classes
                                 var newBoard = _boardPieces.Clone().ToList();
 
 
-                                SwapPosition(newBoard, iSpace, i);
+                                SwapPosition(newBoard, iSpace, i, MoveNumber);
                                 newBoard = newBoard.OrderBy(o => o.Index).ToList();
-                                PossibleBoards.Add(new PraetorianBoard(newBoard, !_mAssassinTurn));
+                                PossibleBoards.Add(new PraetorianBoard(newBoard, !_mAssassinTurn, LastMove));
                             }
                             else
                             {
@@ -473,9 +485,9 @@ namespace CheckersWeb.Classes
                             {
                                 var newBoard = _boardPieces.Clone().ToList();
 
-                                SwapPosition(newBoard, iSpace, i);
+                                SwapPosition(newBoard, iSpace, i, MoveNumber);
                                 newBoard = newBoard.OrderBy(o => o.Index).ToList();
-                                PossibleBoards.Add(new PraetorianBoard(newBoard, !_mAssassinTurn));
+                                PossibleBoards.Add(new PraetorianBoard(newBoard, !_mAssassinTurn, LastMove));
                             }
                             else
                             {
@@ -526,7 +538,7 @@ namespace CheckersWeb.Classes
                             }
 
                             newBoard = newBoard.OrderBy(o => o.Index).ToList();
-                            PossibleBoards.Add(new PraetorianBoard(newBoard, !_mAssassinTurn));
+                            PossibleBoards.Add(new PraetorianBoard(newBoard, !_mAssassinTurn, LastMove));
                             break;
                         }
                     }
@@ -558,7 +570,7 @@ namespace CheckersWeb.Classes
             List<PraetorianBoard> PossibleBoards = new List<PraetorianBoard>();
             for (int i = 0; i < _boardPieces.Count(); i++)
             {
-                if (_boardPieces[i].Piece != CellState.EMPTY)
+                if (_boardPieces[i].Piece != CellState.EMPTY && CanMovePiece(_boardPieces[i], LastMove.Value))
                 {
                     PossibleBoards.AddRange(MoveForAssassin(_boardPieces[i], i));
 
@@ -577,19 +589,34 @@ namespace CheckersWeb.Classes
             MiniMaxWithDebug(depth, _mAssassinTurn, int.MinValue + 1, int.MaxValue - 1, out ret1);
             return ret1;
         }
+
+        public static bool CanMovePiece(PraetorianPieceViewModel pieceToMove, PraetorianPieceViewModel lastMove)
+        {
+            if (pieceToMove.Piece == CellState.PRAETORIAN || pieceToMove.Piece != lastMove.Piece)
+                return true;
+
+            if (pieceToMove.Index != lastMove.Index)
+                return false;
+
+            return true;
+        }
     }
 
     public class PraetorianGameSetup
     {
         public PraetorianBoard Current { get; private set; }
+
+        public KeyValuePair<int, PraetorianPieceViewModel> LastPieceMoved { get; set; }
+
         PraetorianBoard init;
 
         private static PraetorianBoard BeforeUpdate { get; set; }
 
-        public PraetorianGameSetup(List<PraetorianPieceViewModel> boardPieces)
+        public PraetorianGameSetup(List<PraetorianPieceViewModel> boardPieces, KeyValuePair<int, PraetorianPieceViewModel> lastPiece)
         {
+            LastPieceMoved = lastPiece;
             List<PraetorianPieceViewModel> boardPiecesvalues = boardPieces;
-            init = new PraetorianBoard(boardPiecesvalues, true);
+            init = new PraetorianBoard(boardPiecesvalues, true, lastPiece);
 
             var questioned = init.BoardPieces.Where(w => w.HasBeenQuestioned).ToList();
             for(int i = questioned.Count - 1; i > 0 && PraetorianBoard.KnownAssassinIndex.Count > 0; i--)
@@ -611,7 +638,6 @@ namespace CheckersWeb.Classes
                 {
                     var deadLine = allLines.FindAll(PraetorianBoard.findLine(deadTarget.Index, ped.Index));
 
-
                     if (deadLine.Count == 1 && (Math.Abs(deadLine[0].FindIndex(PraetorianBoard.ByInt(deadTarget.Index)) - deadLine[0].FindIndex(PraetorianBoard.ByInt(ped.Index))) == 1) && ped.Piece != CellState.EMPTY)
                     {
                         if (ped.HasBeenQuestioned == false)
@@ -622,13 +648,13 @@ namespace CheckersWeb.Classes
                 }
             }
 
-
             BeforeUpdate = init;
             Current = init;
         }
 
         public PraetorianBoard ComputerMakeMove(int depth, bool IsAssassinTurn)
         {
+            Current.LastMove = LastPieceMoved;
             PraetorianBoard next = Current.FindNextMove(depth, IsAssassinTurn);
             if (next != null)
                 Current = next;

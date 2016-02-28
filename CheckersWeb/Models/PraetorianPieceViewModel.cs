@@ -24,7 +24,7 @@ namespace CheckersWeb.Models
 
         public bool IsCaught { get; set; }
 
-        public List<int> MovesMade { get; set; }
+        public List<KeyValuePair<int, int>> MovesMade { get; set; }
 
         public override string ToString()
         {

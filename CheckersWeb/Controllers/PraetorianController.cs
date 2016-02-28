@@ -12,12 +12,16 @@ namespace CheckersWeb.Controllers
     {
         private static PraetorianBoardViewModel _Board = new PraetorianBoardViewModel();
         private const int GAMEDEPTH = 2;
+        private static int _iMoveNumber = 1;
+        private static KeyValuePair<int, PraetorianPieceViewModel> _LastMove;
+        private static List<KeyValuePair<int, PraetorianPieceViewModel>> _MasterMoveList = new List<KeyValuePair<int, PraetorianPieceViewModel>>();
 
         // GET: Praetorian
         public ActionResult Index()
         {
             var game = new PraetorianGame();
             _Board.Pieces = game.InitBoard().OrderBy(o => o.Index);
+            _LastMove = new KeyValuePair<int, PraetorianPieceViewModel>(0, null);
             return View(_Board);
         }
 
@@ -44,8 +48,10 @@ namespace CheckersWeb.Controllers
             {
                 _Board.IsAssassinComputer = true;
                 PraetorianBoard.ComputerState = PraetorianGameState.ASSASSINTURN;
-                PraetorianGameSetup pGame = new PraetorianGameSetup(_Board.Pieces.ToList());
+                PraetorianGameSetup pGame = new PraetorianGameSetup(_Board.Pieces.ToList(), new KeyValuePair<int, PraetorianPieceViewModel>(0, new PraetorianPieceViewModel() { }));
                 var newBoard = pGame.ComputerMakeMove(GAMEDEPTH, true);
+                _LastMove = new KeyValuePair<int, PraetorianPieceViewModel>(_iMoveNumber++, GetLastMovedPieceFromComputer(newBoard.BoardPieces, _Board.Pieces.ToList()));
+                _MasterMoveList.Add(_LastMove);
                 _Board.Pieces = newBoard.BoardPieces;
                 _Board.GameState = PraetorianGameState.PRAETORIANTURN;
                 _Board.IsLegalMove = true;
@@ -66,6 +72,13 @@ namespace CheckersWeb.Controllers
         {
             var jResult = new JsonResult();
             bool bIsLegal = false;
+            PraetorianPieceViewModel piece = _Board.Pieces.ToList().First(f => f.Position == "sq_" + fromPosition);
+
+            if (_LastMove.Value != null && piece.Piece == _LastMove.Value.Piece)
+            {
+                _Board.IsLegalMove = bIsLegal;
+                return Json(_Board);
+            }
 
             if (string.IsNullOrEmpty(toPosition))
             {
@@ -74,9 +87,8 @@ namespace CheckersWeb.Controllers
             }
 
             //Regardless of the playersideChoosen we just need to know that it was a legal move
-            if(playerSideChoosen == PraetorianGameState.ASSASSINTURN )
+            if (playerSideChoosen == PraetorianGameState.ASSASSINTURN )
             {
-                PraetorianPieceViewModel piece = _Board.Pieces.ToList().First(f => f.Position == "sq_" + fromPosition);
 
                 if (piece.Piece != CellState.PRAETORIAN)
                 {
@@ -102,7 +114,7 @@ namespace CheckersWeb.Controllers
                             if (posPiece != null && posPiece.Piece == CellState.EMPTY)
                             {
                                 var piecesBefore = _Board.Pieces.ToList().Clone();
-                                SwapPosition(_Board.Pieces.ToList(), iPossible, piece.Index);
+                                SwapPosition(_Board.Pieces.ToList(), iPossible, piece.Index, _iMoveNumber++);
                                 _Board.Pieces = _Board.Pieces.OrderBy(o => o.Index);
                                 _Board.GameState = PraetorianGameState.PRAETORIANTURN;
                                 bIsLegal = true;
@@ -115,7 +127,6 @@ namespace CheckersWeb.Controllers
             }
             else
             {
-                PraetorianPieceViewModel piece = _Board.Pieces.ToList().First(f => f.Position == "sq_" + fromPosition);
                 if (piece.Piece != CellState.PRAETORIAN)
                 {
                     List<int> possibleMoves = new List<int>() { piece.Index - 9, piece.Index - 8, piece.Index - 7, piece.Index - 1, piece.Index + 1, piece.Index + 7, piece.Index + 8, piece.Index + 9 };
@@ -140,7 +151,7 @@ namespace CheckersWeb.Controllers
                             if (posPiece != null && posPiece.Piece == CellState.EMPTY)
                             {
                                 var piecesBefore = _Board.Pieces.ToList().Clone();
-                                SwapPosition(_Board.Pieces.ToList(), iPossible, piece.Index);
+                                SwapPosition(_Board.Pieces.ToList(), iPossible, piece.Index, _iMoveNumber++);
                                 _Board.Pieces = _Board.Pieces.OrderBy(o => o.Index);
                                 _Board.GameState = PraetorianGameState.ASSASSINTURN;
                                 bIsLegal = true;
@@ -206,7 +217,7 @@ namespace CheckersWeb.Controllers
                     if(bIsLegal)
                     {
                         var newBoard = _Board.Pieces.ToList().Clone().ToList();
-                        SwapPosition(_Board.Pieces.ToList(), int.Parse(toPosition), int.Parse(fromPosition));
+                        SwapPosition(_Board.Pieces.ToList(), int.Parse(toPosition), int.Parse(fromPosition), _iMoveNumber++);
                         _Board.Pieces = _Board.Pieces.OrderBy(o => o.Index);
                         _Board.GameState = PraetorianGameState.ASSASSINTURN;
                     }
@@ -233,24 +244,31 @@ namespace CheckersWeb.Controllers
         {
             var jResult = new JsonResult();
 
+            PraetorianGameSetup pGame = new PraetorianGameSetup(_Board.Pieces.ToList(), _MasterMoveList[_MasterMoveList.Count - 1]);
             if (playerSideChoosen == PraetorianGameState.ASSASSINTURN)
             {
-                PraetorianGameSetup pGame = new PraetorianGameSetup(_Board.Pieces.ToList());
                 var newBoard = pGame.ComputerMakeMove(GAMEDEPTH, false);
+                _iMoveNumber++;
+                var movePiece = GetLastMovedPieceFromComputer(newBoard.BoardPieces, _Board.Pieces.ToList());
+                _LastMove = new KeyValuePair<int, PraetorianPieceViewModel>(_iMoveNumber, movePiece);
+                _MasterMoveList.Add(_LastMove);
                 _Board.Pieces = newBoard.BoardPieces.OrderBy(o => o.Index);
                 _Board.GameState = PraetorianGameState.ASSASSINTURN;
                 _Board.IsLegalMove = true;
             }
             else
             {
-                PraetorianGameSetup pGame = new PraetorianGameSetup(_Board.Pieces.ToList());
                 var newBoard = pGame.ComputerMakeMove(GAMEDEPTH, true);
+                _iMoveNumber++;
+                var movePiece = GetLastMovedPieceFromComputer(newBoard.BoardPieces, _Board.Pieces.ToList());
+                _LastMove = new KeyValuePair<int, PraetorianPieceViewModel>(_iMoveNumber, movePiece);
+                _MasterMoveList.Add(_LastMove);
                 _Board.Pieces = newBoard.BoardPieces.OrderBy(o => o.Index);
                 _Board.GameState = PraetorianGameState.PRAETORIANTURN;
                 _Board.IsLegalMove = true;
             }
 
-            jResult = Json(_Board);
+             jResult = Json(_Board);
             return jResult;
         }
 
@@ -258,12 +276,20 @@ namespace CheckersWeb.Controllers
         {
             if (positionQuestioned.IsAssassin)
             {
-                _Board.Pieces.First(w => w.Position == positionQuestioned.Position).IsCaught = true;
+                var qPiece = _Board.Pieces.First(w => w.Position == positionQuestioned.Position);
+                qPiece.IsCaught = true;
+                _iMoveNumber++;
+                _LastMove = new KeyValuePair<int, PraetorianPieceViewModel>(_iMoveNumber, new PraetorianPieceViewModel() { Piece = qPiece.Piece });
+                _MasterMoveList.Add(new KeyValuePair<int, PraetorianPieceViewModel>(_iMoveNumber, qPiece));
                 _Board.GameState = PraetorianGameState.PRAETORIANWIN;
             }
             else
             {
-                _Board.Pieces.First(w => w.Position == positionQuestioned.Position).HasBeenQuestioned = true;
+                var qPiece =_Board.Pieces.First(w => w.Position == positionQuestioned.Position);
+                qPiece.HasBeenQuestioned = true;
+                _iMoveNumber++;
+                _LastMove = new KeyValuePair<int, PraetorianPieceViewModel>(_iMoveNumber, new PraetorianPieceViewModel() { Piece = qPiece.Piece, HasBeenQuestioned = true });
+                _MasterMoveList.Add(new KeyValuePair<int, PraetorianPieceViewModel>(_iMoveNumber, qPiece));
                 _Board.GameState = PraetorianGameState.ASSASSINTURN;
             }
 
@@ -289,7 +315,7 @@ namespace CheckersWeb.Controllers
                 newBoard[indexOfTarget].IsTarget = false;
                 newBoard[indexOfTarget].Piece = CellState.EMPTY;
                 newBoard[indexOfTarget].IsCaught = false;
-                newBoard[indexOfTarget].MovesMade = new List<int>();
+                newBoard[indexOfTarget].MovesMade = new List<KeyValuePair<int, int>>();
 
                 _Board.Pieces = newBoard;
             }
@@ -314,7 +340,7 @@ namespace CheckersWeb.Controllers
             };
         }
 
-        public void SwapPosition(List<PraetorianPieceViewModel> model, int ito, int ifrom)
+        public void SwapPosition(List<PraetorianPieceViewModel> model, int ito, int ifrom, int iMoveNumber)
         {
             var to = model[ito];
             var from = model[ifrom];
@@ -326,7 +352,28 @@ namespace CheckersWeb.Controllers
             to.Index = tempIndex;
             model[ito] = from;
             model[ifrom] = to;
-            model[ito].MovesMade.Add(ito);
+            model[ito].MovesMade.Add(new KeyValuePair<int, int>(iMoveNumber, ito));
+            _LastMove = new KeyValuePair<int, PraetorianPieceViewModel>(iMoveNumber, model[ito]);
+            _MasterMoveList.Add(new KeyValuePair<int, PraetorianPieceViewModel>(iMoveNumber, model[ito]));
+        }
+        
+        private PraetorianPieceViewModel GetLastMovedPieceFromComputer(List<PraetorianPieceViewModel> computerMove, List<PraetorianPieceViewModel> previousBoard)
+        {
+            PraetorianPieceViewModel piece = new PraetorianPieceViewModel();
+            foreach(var cPiece in computerMove)
+            {
+                if (cPiece.Piece != CellState.EMPTY && cPiece.Piece != CellState.PRAETORIAN)
+                {
+                    var pPiece = previousBoard.First(f => f.Piece == cPiece.Piece);
+                    if (pPiece.Index != cPiece.Index)
+                    {
+                        piece = cPiece;
+                        break;
+                    }
+                }
+            }
+
+            return piece;
         }
     }
 }
